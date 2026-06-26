@@ -7,7 +7,8 @@
     "dev": "astro dev --host 127.0.0.1 --port 4321",
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1 --port 4321",
-    "asset:hero": "python tools/generate_nebula.py"
+    "asset:hero": "python tools/generate_nebula.py",
+    "asset:media": "python tools/generate_media.py"
   },
   "dependencies": {
     "astro": "^5.15.6"

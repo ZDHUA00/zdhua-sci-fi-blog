@@ -9,6 +9,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
+const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title={`${post.data.title} | ZDHUA.LOG`} description={post.data.description}>
@@ -16,6 +17,9 @@ const { Content, headings } = await render(post);
     <div class="read-progress" id="readProgress" aria-hidden="true"></div>
     <article class="article-page">
       <header class="article-header">
+        <div class="article-cover">
+          <img src={`${base}${post.data.cover}`} alt={post.data.coverAlt} />
+        </div>
         <span class="signal-line">{post.data.signal} / {post.data.category} / {post.data.readTime}</span>
         <h1>{post.data.title}</h1>
         <p>{post.data.description}</p>
@@ -38,7 +42,7 @@ const { Content, headings } = await render(post);
       ) : (
         <p>暂无目录</p>
       )}
-      <a class="reader-link" href={`${import.meta.env.BASE_URL}blog/`}>返回归档</a>
+      <a class="reader-link" href={`${base}blog/`}>返回归档</a>
     </aside>
   </main>
 </BaseLayout>

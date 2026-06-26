@@ -5,6 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const featured = posts.find((post) => post.data.featured) ?? posts[0];
 const categories = ['All', ...Array.from(new Set(posts.map((post) => post.data.category)))];
+const base = import.meta.env.BASE_URL;
 const postData = posts.map((post) => ({
   slug: post.slug,
   title: post.data.title,
@@ -14,7 +15,9 @@ const postData = posts.map((post) => ({
   signal: post.data.signal,
   description: post.data.description,
   tags: post.data.tags,
-  url: `${import.meta.env.BASE_URL}blog/${post.slug}/`,
+  cover: `${base}${post.data.cover}`,
+  coverAlt: post.data.coverAlt,
+  url: `${base}blog/${post.slug}/`,
 }));
 ---
 
@@ -22,17 +25,17 @@ const postData = posts.map((post) => ({
   <main>
     <section class="hero-section" aria-labelledby="heroTitle">
       <div class="hero-media" aria-hidden="true">
-        <img src={`${import.meta.env.BASE_URL}assets/nebula-field.png`} alt="" />
+        <img src={`${base}assets/nebula-field.png`} alt="" />
       </div>
       <div class="hero-grid">
         <div class="hero-copy">
           <h1 id="heroTitle">ZDHUA.LOG</h1>
           <p>
-            用工程视角记录服务器、自动化、AI 工具和数字系统。这里不是空白模板，而是一座持续更新的个人星际档案馆。
+            这里是我的私人星际档案馆：服务器、自动化、AI 工具链、部署记录和界面实验都会被整理成可追踪的日志。
           </p>
           <div class="hero-actions">
             <a class="primary-link" href="#archive">进入文章库</a>
-            <a class="secondary-link" href="#lab">查看实验室</a>
+            <a class="secondary-link" href={`${base}blog/${featured.slug}/`}>阅读最新日志</a>
           </div>
         </div>
 
@@ -43,11 +46,11 @@ const postData = posts.map((post) => ({
               <strong>{String(posts.length).padStart(2, '0')}</strong>
             </div>
             <div>
-              <span>主题簇</span>
+              <span>主题轨道</span>
               <strong>{String(categories.length - 1).padStart(2, '0')}</strong>
             </div>
             <div>
-              <span>最新轨道</span>
+              <span>最新编号</span>
               <strong>{featured.data.signal}</strong>
             </div>
           </div>
@@ -56,6 +59,42 @@ const postData = posts.map((post) => ({
             <p>Current orbit: engineering notes, deployment logs, automation systems.</p>
           </div>
         </aside>
+      </div>
+    </section>
+
+    <section class="feature-strip" aria-label="设计状态">
+      <div>
+        <span>Signal</span>
+        <strong>Clean UI</strong>
+      </div>
+      <div>
+        <span>Audio</span>
+        <strong>3 ambient tracks</strong>
+      </div>
+      <div>
+        <span>Assets</span>
+        <strong>local covers</strong>
+      </div>
+      <div>
+        <span>Runtime</span>
+        <strong>Astro static</strong>
+      </div>
+    </section>
+
+    <section class="featured-section" aria-labelledby="featuredTitle">
+      <div class="section-heading">
+        <h2 id="featuredTitle">精选轨道</h2>
+        <p>把最近的部署、服务器和工具链记录放在前排，先看到上下文，再进入完整文章。</p>
+      </div>
+      <div class="featured-grid">
+        {posts.slice(0, 3).map((post, index) => (
+          <a class:list={['featured-card', index === 0 && 'featured-card-large']} href={`${base}blog/${post.slug}/`}>
+            <img src={`${base}${post.data.cover}`} alt={post.data.coverAlt} loading={index === 0 ? 'eager' : 'lazy'} />
+            <span class="signal-line">{post.data.signal} / {post.data.category}</span>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.description}</p>
+          </a>
+        ))}
       </div>
     </section>
 
@@ -88,7 +127,7 @@ const postData = posts.map((post) => ({
               data-category={post.data.category}
               data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(' ')}`}
             >
-              <span class="article-index">{String(index + 1).padStart(2, '0')}</span>
+              <img src={`${base}${post.data.cover}`} alt="" loading="lazy" />
               <span>
                 <span class="signal-line">{post.data.signal} / {post.data.category}</span>
                 <h3>{post.data.title}</h3>
@@ -104,21 +143,39 @@ const postData = posts.map((post) => ({
         </div>
 
         <article class="reader-panel" id="readerPanel" aria-labelledby="readerTitle">
+          <img id="readerCover" src={`${base}${featured.data.cover}`} alt={featured.data.coverAlt} />
           <div class="reader-meta" id="readerMeta">{featured.data.signal} / {featured.data.category}</div>
           <h3 id="readerTitle">{featured.data.title}</h3>
           <p id="readerExcerpt">{featured.data.description}</p>
           <div class="reader-tags" id="readerTags">
             {featured.data.tags.map((tag) => <span>{tag}</span>)}
           </div>
-          <a class="reader-link" id="readerLink" href={`${import.meta.env.BASE_URL}blog/${featured.slug}/`}>打开完整日志</a>
+          <a class="reader-link" id="readerLink" href={`${base}blog/${featured.slug}/`}>打开完整日志</a>
         </article>
+      </div>
+    </section>
+
+    <section class="gallery-section" aria-labelledby="galleryTitle">
+      <div class="section-heading">
+        <h2 id="galleryTitle">视觉场</h2>
+        <p>站点图片全部走本地静态资源，不依赖外部图库，部署后加载稳定。</p>
+      </div>
+      <div class="gallery-grid">
+        <figure>
+          <img src={`${base}assets/gallery/orbital-console.png`} alt="轨道控制台风格的科幻界面场景" loading="lazy" />
+          <figcaption>ORBITAL CONSOLE</figcaption>
+        </figure>
+        <figure>
+          <img src={`${base}assets/gallery/signal-archive.png`} alt="信号档案库风格的科幻界面场景" loading="lazy" />
+          <figcaption>SIGNAL ARCHIVE</figcaption>
+        </figure>
       </div>
     </section>
 
     <section class="lab-section" id="lab" aria-labelledby="labTitle">
       <div class="section-heading">
         <h2 id="labTitle">实验室</h2>
-        <p>博客不是单调文章墙，而是工程、部署、自动化和界面实验的工作台。</p>
+        <p>博客不是单调文章墙，而是工程、部署、自动化、音乐和界面实验的工作台。</p>
       </div>
       <div class="lab-grid">
         <article class="lab-card">
@@ -127,14 +184,14 @@ const postData = posts.map((post) => ({
           <p>记录服务器、域名、容器和反代配置，方便每次改动都有上下文。</p>
         </article>
         <article class="lab-card">
-          <div class="lab-code">AI</div>
-          <h3>自动化笔记</h3>
-          <p>沉淀注册、邮件、代理池和多流程协作的真实问题与解决方案。</p>
+          <div class="lab-code">AUDIO</div>
+          <h3>背景音轨</h3>
+          <p>三段本地合成氛围音乐，支持播放、暂停、上一首、下一首、进度和音量。</p>
         </article>
         <article class="lab-card">
           <div class="lab-code">UX</div>
           <h3>界面实验</h3>
-          <p>尝试更高密度、更有空间感的个人站视觉语言。</p>
+          <p>保持科幻感，同时控制信息密度，避免动效遮挡阅读和操作。</p>
         </article>
       </div>
     </section>
@@ -142,13 +199,13 @@ const postData = posts.map((post) => ({
     <section class="timeline-section" id="timeline" aria-labelledby="timelineTitle">
       <div class="section-heading">
         <h2 id="timelineTitle">时间线</h2>
-        <p>提交记录、发布日志和文章更新都可以合并到这里。</p>
+        <p>提交记录、发布日志和文章更新合并在同一条可追踪信号链里。</p>
       </div>
       <ol class="timeline">
-        {posts.slice(0, 4).map((post) => (
+        {posts.slice(0, 5).map((post) => (
           <li>
             <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
-            <a href={`${import.meta.env.BASE_URL}blog/${post.slug}/`}>{post.data.title}</a>
+            <a href={`${base}blog/${post.slug}/`}>{post.data.title}</a>
           </li>
         ))}
       </ol>

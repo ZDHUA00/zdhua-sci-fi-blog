@@ -8,9 +8,26 @@ interface Props {
 
 const {
   title = 'ZDHUA.LOG',
-  description = 'ZDHUA.LOG 是一个科幻视觉风格的个人博客，记录工程、自动化、服务器和 AI 工具链。',
+  description = 'ZDHUA.LOG 是一个科幻视觉风格的个人博客，记录工程、自动化、服务器、AI 工具链和界面实验。',
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const tracks = [
+  {
+    title: 'Orbit Drift',
+    mood: 'Deep ambient',
+    src: `${base}media/orbit-drift.wav`,
+  },
+  {
+    title: 'Signal Cascade',
+    mood: 'Pulse sequence',
+    src: `${base}media/signal-cascade.wav`,
+  },
+  {
+    title: 'Deep Relay',
+    mood: 'Slow transmission',
+    src: `${base}media/deep-relay.wav`,
+  },
+];
 ---
 
 <!doctype html>
@@ -20,7 +37,11 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#07080d" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
     <title>{title}</title>
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
     <link rel="preload" href={`${base}assets/nebula-field.png`} as="image" />
   </head>
   <body>
@@ -37,15 +58,46 @@ const base = import.meta.env.BASE_URL;
         <a href={`${base}#lab`}>实验室</a>
         <a href={`${base}#timeline`}>时间线</a>
       </nav>
-      <button class="icon-button" id="themeToggle" type="button" aria-label="切换显示模式" title="切换显示模式">
+      <button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="切换显示模式" title="切换显示模式">
         <span class="theme-icon" aria-hidden="true"></span>
       </button>
     </header>
+    <section class="audio-dock" id="audioDock" data-tracks={JSON.stringify(tracks)} aria-label="背景音乐播放器">
+      <div class="audio-meta">
+        <span class="audio-kicker">ZDHUA.FM</span>
+        <strong id="trackTitle">Orbit Drift</strong>
+        <span id="trackMood">Deep ambient</span>
+      </div>
+      <div class="audio-visualizer" id="audioVisualizer" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="audio-controls">
+        <button class="audio-button" id="prevTrack" type="button" aria-label="上一首" title="上一首">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM10 12l9-7v14z"></path></svg>
+        </button>
+        <button class="audio-button audio-play" id="playToggle" type="button" aria-label="播放背景音乐" title="播放背景音乐">
+          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg>
+        </button>
+        <button class="audio-button" id="nextTrack" type="button" aria-label="下一首" title="下一首">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM5 19V5l9 7z"></path></svg>
+        </button>
+      </div>
+      <label class="audio-progress" aria-label="播放进度">
+        <span id="trackTime">0:00</span>
+        <input id="trackProgress" type="range" min="0" max="1000" value="0" />
+      </label>
+      <label class="volume-control" aria-label="音量">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 1.2a3 3 0 0 1 0 3.6l1.5 1.3a5 5 0 0 0 0-6.2l-1.5 1.3z"></path></svg>
+        <input id="volumeControl" type="range" min="0" max="1" step="0.01" value="0.42" />
+      </label>
+    </section>
     <slot />
     <footer class="site-footer">
       <span>ZDHUA.LOG</span>
-      <span>Astro + native JS/CSS</span>
+      <span>Astro + native JS/CSS · Deployed on GitHub Pages</span>
     </footer>
+
     <script src={`${base}scripts/blog.js`} defer></script>
   </body>
 </html>
