@@ -1,0 +1,157 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const featured = posts.find((post) => post.data.featured) ?? posts[0];
+const categories = ['All', ...Array.from(new Set(posts.map((post) => post.data.category)))];
+const postData = posts.map((post) => ({
+  slug: post.slug,
+  title: post.data.title,
+  category: post.data.category,
+  date: post.data.date.toISOString().slice(0, 10),
+  readTime: post.data.readTime,
+  signal: post.data.signal,
+  description: post.data.description,
+  tags: post.data.tags,
+  url: `${import.meta.env.BASE_URL}blog/${post.slug}/`,
+}));
+---
+
+<BaseLayout title="ZDHUA.LOG | Sci-Fi Blog">
+  <main>
+    <section class="hero-section" aria-labelledby="heroTitle">
+      <div class="hero-media" aria-hidden="true">
+        <img src={`${import.meta.env.BASE_URL}assets/nebula-field.png`} alt="" />
+      </div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1 id="heroTitle">ZDHUA.LOG</h1>
+          <p>
+            用工程视角记录服务器、自动化、AI 工具和数字系统。这里不是空白模板，而是一座持续更新的个人星际档案馆。
+          </p>
+          <div class="hero-actions">
+            <a class="primary-link" href="#archive">进入文章库</a>
+            <a class="secondary-link" href="#lab">查看实验室</a>
+          </div>
+        </div>
+
+        <aside class="mission-panel" aria-label="博客状态">
+          <div class="panel-grid">
+            <div>
+              <span>文章信号</span>
+              <strong>{String(posts.length).padStart(2, '0')}</strong>
+            </div>
+            <div>
+              <span>主题簇</span>
+              <strong>{String(categories.length - 1).padStart(2, '0')}</strong>
+            </div>
+            <div>
+              <span>最新轨道</span>
+              <strong>{featured.data.signal}</strong>
+            </div>
+          </div>
+          <div class="orbit-readout">
+            <span></span>
+            <p>Current orbit: engineering notes, deployment logs, automation systems.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="archive-section" id="archive" aria-labelledby="archiveTitle" data-posts={JSON.stringify(postData)}>
+      <div class="section-heading">
+        <h2 id="archiveTitle">文章库</h2>
+        <p>像控制台一样检索文章：搜索、分类、选择、预览，然后进入完整日志。</p>
+      </div>
+      <div class="archive-controls" aria-label="文章筛选">
+        <label class="search-box" for="searchInput">
+          <span aria-hidden="true"></span>
+          <input id="searchInput" type="search" placeholder="搜索标题、标签或摘要" autocomplete="off" />
+        </label>
+        <div class="filter-tabs" id="filterTabs" role="tablist" aria-label="分类筛选">
+          {categories.map((category) => (
+            <button type="button" role="tab" aria-selected={category === 'All'} data-category={category}>
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div class="archive-layout">
+        <div class="archive-list" id="archiveList">
+          {posts.map((post, index) => (
+            <button
+              class:list={['archive-card', index === 0 && 'active']}
+              type="button"
+              data-index={index}
+              data-category={post.data.category}
+              data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(' ')}`}
+            >
+              <span class="article-index">{String(index + 1).padStart(2, '0')}</span>
+              <span>
+                <span class="signal-line">{post.data.signal} / {post.data.category}</span>
+                <h3>{post.data.title}</h3>
+                <p>{post.data.description}</p>
+                <span class="card-meta">
+                  <span>{post.data.date.toISOString().slice(0, 10)}</span>
+                  <span>{post.data.readTime}</span>
+                  {post.data.tags.map((tag) => <span>{tag}</span>)}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <article class="reader-panel" id="readerPanel" aria-labelledby="readerTitle">
+          <div class="reader-meta" id="readerMeta">{featured.data.signal} / {featured.data.category}</div>
+          <h3 id="readerTitle">{featured.data.title}</h3>
+          <p id="readerExcerpt">{featured.data.description}</p>
+          <div class="reader-tags" id="readerTags">
+            {featured.data.tags.map((tag) => <span>{tag}</span>)}
+          </div>
+          <a class="reader-link" id="readerLink" href={`${import.meta.env.BASE_URL}blog/${featured.slug}/`}>打开完整日志</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="lab-section" id="lab" aria-labelledby="labTitle">
+      <div class="section-heading">
+        <h2 id="labTitle">实验室</h2>
+        <p>博客不是单调文章墙，而是工程、部署、自动化和界面实验的工作台。</p>
+      </div>
+      <div class="lab-grid">
+        <article class="lab-card">
+          <div class="lab-code">OPS</div>
+          <h3>部署观测</h3>
+          <p>记录服务器、域名、容器和反代配置，方便每次改动都有上下文。</p>
+        </article>
+        <article class="lab-card">
+          <div class="lab-code">AI</div>
+          <h3>自动化笔记</h3>
+          <p>沉淀注册、邮件、代理池和多流程协作的真实问题与解决方案。</p>
+        </article>
+        <article class="lab-card">
+          <div class="lab-code">UX</div>
+          <h3>界面实验</h3>
+          <p>尝试更高密度、更有空间感的个人站视觉语言。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="timeline-section" id="timeline" aria-labelledby="timelineTitle">
+      <div class="section-heading">
+        <h2 id="timelineTitle">时间线</h2>
+        <p>提交记录、发布日志和文章更新都可以合并到这里。</p>
+      </div>
+      <ol class="timeline">
+        {posts.slice(0, 4).map((post) => (
+          <li>
+            <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
+            <a href={`${import.meta.env.BASE_URL}blog/${post.slug}/`}>{post.data.title}</a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="文章归档 | ZDHUA.LOG" description="ZDHUA.LOG 的全部文章归档。">
+  <main class="page-shell">
+    <section class="page-hero">
+      <h1>文章归档</h1>
+      <p>全部日志按时间倒序排列。每篇文章都是一个可追踪的工程信号。</p>
+    </section>
+    <section class="archive-grid-page" aria-label="全部文章">
+      {posts.map((post, index) => (
+        <a class="post-tile" href={`${import.meta.env.BASE_URL}blog/${post.slug}/`}>
+          <span class="article-index">{String(index + 1).padStart(2, '0')}</span>
+          <span class="signal-line">{post.data.signal} / {post.data.category}</span>
+          <h2>{post.data.title}</h2>
+          <p>{post.data.description}</p>
+          <span class="card-meta">
+            <span>{post.data.date.toISOString().slice(0, 10)}</span>
+            <span>{post.data.readTime}</span>
+          </span>
+        </a>
+      ))}
+    </section>
+  </main>
+</BaseLayout>

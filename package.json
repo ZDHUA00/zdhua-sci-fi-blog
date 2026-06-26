@@ -1,0 +1,16 @@
+{
+  "name": "zdhua-sci-fi-blog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1 --port 4321",
+    "build": "astro build",
+    "preview": "astro preview --host 127.0.0.1 --port 4321",
+    "asset:hero": "python tools/generate_nebula.py"
+  },
+  "dependencies": {
+    "astro": "^5.15.6"
+  },
+  "devDependencies": {}
+}

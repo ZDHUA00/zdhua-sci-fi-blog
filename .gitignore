@@ -1,0 +1,7 @@
+﻿node_modules/
+output/
+dist/
+.astro/
+.astro-cache/
+.DS_Store
+Thumbs.db
