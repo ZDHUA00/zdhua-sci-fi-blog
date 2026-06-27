@@ -1,0 +1,38 @@
+export const projects = [
+  {
+    title: 'ZDHUA-Blog',
+    description: '基于 Astro Sphere 开源方向改造的个人作品集与博客，部署在 GitHub Pages 和 zdhua.me。',
+    year: '2026',
+    status: 'LIVE',
+    accent: 'green',
+    href: '/',
+    stack: ['Astro', 'CSS', 'GitHub Pages'],
+  },
+  {
+    title: 'Starship UI Lab',
+    description: '一组深空风格界面实验，包括星域 Canvas、信号图、BGM 控制和响应式 HUD。',
+    year: '2026',
+    status: 'LAB',
+    accent: 'cyan',
+    href: '/blog/canvas-performance-budget/',
+    stack: ['Canvas', 'Web Audio', 'Motion'],
+  },
+  {
+    title: 'Deploy Orbit',
+    description: '记录自定义域名、GitHub Actions、Pages 构建和静态站点部署的完整流程。',
+    year: '2026',
+    status: 'DOCS',
+    accent: 'amber',
+    href: '/blog/github-pages-domain/',
+    stack: ['DNS', 'Actions', 'Astro'],
+  },
+  {
+    title: 'AI Tool Notes',
+    description: '整理 AI 辅助开发、提示词、自动化脚本和日常工作流中的实用经验。',
+    year: '2026',
+    status: 'WIP',
+    accent: 'magenta',
+    href: '/blog/ai-workflow-notes/',
+    stack: ['AI', 'Workflow', 'Notes'],
+  },
+] as const;

@@ -1,25 +1,25 @@
 ---
-title: "让 zdhua.me 指向新的 GitHub Pages"
-description: "自定义域名部署的关键是 Pages 设置、CNAME 文件、DNS 记录和构建 base 路径保持一致。"
-pubDate: 2026-06-23
-tags: ["域名", "GitHub Pages", "部署"]
-channel: "DOMAIN-21"
+title: "把 ZDHUA-Blog 稳定部署到 zdhua.me"
+description: "记录 GitHub Pages、自定义域名、CNAME 和 Astro base/site 配置之间的关系。"
+pubDate: 2026-06-26
+tags: ["部署", "GitHub Pages", "域名"]
+channel: "DEPLOY-03"
 status: "READY"
-intensity: 63
-accent: "green"
+intensity: 66
+accent: "amber"
 readTime: "4 min"
 ---
 
-`zdhua.me` 访问博客，需要 GitHub Pages 和 DNS 同时正确。仓库里保留 `public/CNAME`，构建后会出现在发布产物根目录，内容就是域名本身。
+`ZDHUA-Blog` 当前使用 GitHub Pages 部署，自定义域名是 `zdhua.me`。仓库里的 `public/CNAME` 会在构建时复制到 `dist` 根目录，GitHub Pages 通过它识别域名。
 
-Astro 构建时还要使用正确的站点地址和 base 路径。自定义域名部署在根路径，所以 `SITE_URL` 是 `https://zdhua.me`，`BASE_PATH` 是 `/`。
+Astro 构建时需要正确的 `site` 和 `base`。这个站点部署在自定义域名根路径，所以构建环境使用 `SITE_URL=https://zdhua.me` 和 `BASE_PATH=/`。
 
-## DNS 侧
+## 部署链路
 
-如果域名托管在 Cloudflare 或其他 DNS 服务商，需要把根域名指向 GitHub Pages。常见做法是配置 GitHub Pages 的 A 记录，或者用合适的 CNAME/ALIAS 记录。
+推送到 `main` 分支后，GitHub Actions 会执行安装依赖、构建 Astro、上传 Pages artifact 和部署。
 
-DNS 生效需要时间。代码推送成功不代表域名立即更新，但 Pages 的部署日志会先给出产物状态。
+本地只需要保证 `npm run build` 通过，线上大部分问题都可以从 Actions 日志和浏览器控制台定位。
 
-## 仓库侧
+## DNS 注意点
 
-工作流在 `main` 分支推送后自动构建。只要 GitHub Pages 的来源设置为 Actions，部署完成后就会更新线上站点。
+如果以后换 DNS 服务商，需要确认根域名指向 GitHub Pages 的地址，同时 GitHub Pages 设置里仍然绑定 `zdhua.me`。

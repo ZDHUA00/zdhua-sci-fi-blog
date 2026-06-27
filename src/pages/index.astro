@@ -2,98 +2,107 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostSignal from '../components/PostSignal.astro';
+import { projects } from '../data/projects';
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
-const featured = posts.slice(0, 3);
+const recentPosts = posts.slice(0, 3);
+const recentProjects = projects.slice(0, 3);
 ---
 
 <BaseLayout active="home">
   <main id="main">
-    <section class="hero" data-console-tilt>
-      <div class="hero__copy">
-        <h1>ZDHUA.LOG</h1>
-        <p>
-          一座面向个人技术记录的星际舰船控制台。部署、自动化、AI 工具、界面实验都被整理成可扫描的航行日志。
+    <section class="sphere-hero" data-console-tilt>
+      <div class="planet-crescent" aria-hidden="true">
+        <div class="planet-glow"></div>
+      </div>
+      <div class="sphere-hero__content">
+        <p class="hero-intro">Hello, I am building</p>
+        <h1>ZDHUA-Blog</h1>
+        <p class="hero-subtitle">
+          一个个人作品集与技术博客，记录前端开发、网站部署、AI 工具、自动化流程和带一点深空感的界面实验。
         </p>
         <div class="hero__actions">
-          <a class="primary-action" href="/blog/">打开档案舱</a>
-          <a class="secondary-action" href="#latest">查看最新信号</a>
-        </div>
-      </div>
-
-      <div class="cockpit" aria-label="星舰控制台状态">
-        <div class="cockpit__viewport">
-          <div class="reticle" aria-hidden="true"></div>
-          <div class="trajectory trajectory--one" aria-hidden="true"></div>
-          <div class="trajectory trajectory--two" aria-hidden="true"></div>
-          <div class="cockpit__readout">
-            <span>ORBIT</span>
-            <strong>zdhua.me</strong>
-          </div>
-        </div>
-        <div class="cockpit__rail">
-          <span>CORE</span>
-          <b>97%</b>
-          <span>SYNC</span>
-          <b>ACTIVE</b>
-          <span>BUILD</span>
-          <b>ASTRO</b>
+          <a class="primary-action" href="/blog/">Read the blog</a>
+          <a class="secondary-action" href="/projects/">View projects</a>
         </div>
       </div>
     </section>
 
-    <section class="systems">
-      <div class="system-panel system-panel--green">
-        <span>01</span>
-        <h2>轻量星域</h2>
-        <p>Canvas 限制 DPR 和帧率，页面隐藏时暂停，移动端减少粒子数量。</p>
-      </div>
-      <div class="system-panel system-panel--amber">
-        <span>02</span>
-        <h2>隐藏广播</h2>
-        <p>顶部下拉式 BGM，Web Audio 合成音轨，音量上限提升到 500%。</p>
-      </div>
-      <div class="system-panel system-panel--magenta">
-        <span>03</span>
-        <h2>动态档案</h2>
-        <p>每篇文章用种子生成独立信号图，不依赖单调静态封面。</p>
-      </div>
-    </section>
+    <div class="sphere-content">
+      <section class="profile-section">
+        <p>
+          我是 ZDHUA，正在把这个站点打造成一个长期维护的个人主页。这里不会只放普通文章列表，也会记录我做过的项目、部署经验、工具实验和界面设计想法。
+        </p>
+        <p>
+          这个版本采用 <strong>Astro Sphere</strong> 的开源思路：轻量、现代、个人品牌优先。视觉上保留黑色星空、轨道、信号图和 BGM 控制，但页面结构会更像成熟作品集。
+        </p>
+      </section>
 
-    <section class="latest" id="latest">
-      <div class="section-heading">
-        <h2>最新航行日志</h2>
-        <a href="/blog/">全部档案</a>
-      </div>
-      <div class="latest-grid">
-        {featured.map((post) => (
-          <article class={`log-card log-card--${post.data.accent}`} data-log-card>
-            <a href={`/blog/${post.slug}/`} aria-label={`阅读 ${post.data.title}`}>
-              <PostSignal seed={post.slug} accent={post.data.accent} intensity={post.data.intensity} />
-              <div class="log-card__body">
-                <div class="log-card__meta">
-                  <span>{post.data.channel}</span>
-                  <time datetime={post.data.pubDate.toISOString()}>{post.data.pubDate.toLocaleDateString('zh-CN')}</time>
-                </div>
+      <section class="list-section">
+        <div class="section-heading">
+          <h2>Recent posts</h2>
+          <a href="/blog/">All posts</a>
+        </div>
+        <div class="arrow-list">
+          {recentPosts.map((post) => (
+            <a class="arrow-card" href={`/blog/${post.slug}/`}>
+              <span>{post.data.channel}</span>
+              <div>
                 <h3>{post.data.title}</h3>
                 <p>{post.data.description}</p>
               </div>
+              <time datetime={post.data.pubDate.toISOString()}>{post.data.pubDate.toLocaleDateString('zh-CN')}</time>
             </a>
-          </article>
-        ))}
-      </div>
-    </section>
+          ))}
+        </div>
+      </section>
 
-    <section class="manifest">
-      <div>
-        <h2>重建目标</h2>
-        <p>
-          保留 GitHub Pages 与自定义域名，把博客重新做成一台有层次的舰船操作界面：先有视觉冲击，再保证阅读、筛选、播放和移动端都顺滑。
-        </p>
-      </div>
-      <a class="primary-action" href="/blog/">进入日志索引</a>
-    </section>
+      <section class="stack-section">
+        <h2>Website built with</h2>
+        <div class="stack-grid">
+          <span>Astro</span>
+          <span>Markdown</span>
+          <span>Native JS</span>
+          <span>CSS Motion</span>
+          <span>GitHub Pages</span>
+          <span>zdhua.me</span>
+        </div>
+      </section>
+
+      <section class="list-section">
+        <div class="section-heading">
+          <h2>Recent projects</h2>
+          <a href="/projects/">All projects</a>
+        </div>
+        <div class="project-preview-grid">
+          {recentProjects.map((project) => (
+            <article class={`project-card project-card--${project.accent}`}>
+              <div class="project-card__top">
+                <span>{project.status}</span>
+                <strong>{project.year}</strong>
+              </div>
+              <h3>{project.title}</h3>
+              <p>{project.description}</p>
+              <div class="tag-line">
+                {project.stack.map((item) => <span>{item}</span>)}
+              </div>
+              <a href={project.href}>查看项目</a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="visual-section">
+        <div>
+          <h2>Signal visual system</h2>
+          <p>
+            每篇文章仍然保留独立的信号图，但它现在是作品集体系的一部分，而不是单纯装饰。后续可以继续扩展成项目封面、技术栈标识和搜索动效。
+          </p>
+        </div>
+        <PostSignal seed="zdhua-blog-sphere" accent="green" intensity={78} />
+      </section>
+    </div>
   </main>
 </BaseLayout>

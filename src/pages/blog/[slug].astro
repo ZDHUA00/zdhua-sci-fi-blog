@@ -17,13 +17,13 @@ const { Content } = await render(post);
 
 <BaseLayout
   active="blog"
-  title={`${post.data.title} | ZDHUA.LOG`}
+  title={`${post.data.title} | ZDHUA-Blog`}
   description={post.data.description}
 >
   <main id="main">
     <article class={`article-shell article-shell--${post.data.accent}`}>
       <header class="article-hero">
-        <a class="back-link" href="/blog/">返回档案舱</a>
+        <a class="back-link" href="/blog/">返回 Blog</a>
         <div class="article-hero__grid">
           <div>
             <div class="article-meta">
@@ -41,7 +41,7 @@ const { Content } = await render(post);
             seed={post.slug}
             accent={post.data.accent}
             intensity={post.data.intensity}
-            label={`${post.data.title} 信号图`}
+            label={`${post.data.title} signal visual`}
           />
         </div>
       </header>

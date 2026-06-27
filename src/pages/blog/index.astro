@@ -11,13 +11,13 @@ const tags = Array.from(new Set(posts.flatMap((post) => post.data.tags))).sort()
 
 <BaseLayout
   active="blog"
-  title="档案舱 | ZDHUA.LOG"
-  description="ZDHUA.LOG 的全部技术日志。"
+  title="Blog | ZDHUA-Blog"
+  description="ZDHUA-Blog 的技术文章、部署记录、AI 工具笔记和界面实验。"
 >
   <main id="main">
     <section class="archive-hero">
-      <h1>舰船档案舱</h1>
-      <p>按信号类型筛选文章，快速进入部署、自动化、AI 工具和界面实验记录。</p>
+      <h1>Blog</h1>
+      <p>写给自己的技术档案，也给以后继续改站、做项目、部署服务时快速回看。</p>
     </section>
 
     <section class="filter-bar" data-filter-bar aria-label="文章筛选">
@@ -32,7 +32,6 @@ const tags = Array.from(new Set(posts.flatMap((post) => post.data.tags))).sort()
             <PostSignal seed={post.slug} accent={post.data.accent} intensity={post.data.intensity} />
             <div class="archive-row__body">
               <div class="archive-row__meta">
-                <span>{post.data.status}</span>
                 <span>{post.data.channel}</span>
                 <time datetime={post.data.pubDate.toISOString()}>{post.data.pubDate.toLocaleDateString('zh-CN')}</time>
               </div>

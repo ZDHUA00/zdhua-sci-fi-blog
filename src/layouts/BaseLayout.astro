@@ -6,12 +6,12 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
-  active?: 'home' | 'blog';
+  active?: 'home' | 'blog' | 'projects';
 }
 
 const {
-  title = 'ZDHUA.LOG | 星际舰船档案控制台',
-  description = 'ZDHUA 的个人博客，记录部署、自动化、AI 工具与界面实验。',
+  title = 'ZDHUA-Blog | Personal Portfolio and Blog',
+  description = 'ZDHUA-Blog 是一个个人作品集与技术博客，记录前端、部署、AI 工具和界面实验。',
   active = 'home',
 } = Astro.props;
 
@@ -24,7 +24,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://zdhua.me');
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#070a0c" />
+    <meta name="theme-color" content="#030406" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" />
     <title>{title}</title>
@@ -34,22 +34,23 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://zdhua.me');
     <a class="skip-link" href="#main">跳到正文</a>
     <div class="scan-grid" aria-hidden="true"></div>
     <header class="site-header">
-      <a class="brand" href="/" aria-label="ZDHUA.LOG 首页">
+      <a class="brand" href="/" aria-label="ZDHUA-Blog 首页">
         <span class="brand-mark" aria-hidden="true">Z</span>
-        <span>ZDHUA.LOG</span>
+        <span>ZDHUA-Blog</span>
       </a>
       <nav class="site-nav" aria-label="主导航">
-        <a href="/" aria-current={active === 'home' ? 'page' : undefined}>舰桥</a>
-        <a href="/blog/" aria-current={active === 'blog' ? 'page' : undefined}>档案</a>
+        <a href="/" aria-current={active === 'home' ? 'page' : undefined}>Home</a>
+        <a href="/projects/" aria-current={active === 'projects' ? 'page' : undefined}>Projects</a>
+        <a href="/blog/" aria-current={active === 'blog' ? 'page' : undefined}>Blog</a>
         <a href="https://github.com/ZDHUA00" rel="noreferrer">GitHub</a>
       </nav>
       <AudioControl />
     </header>
     <slot />
     <footer class="site-footer">
-      <span>ZDHUA.LOG</span>
+      <span>ZDHUA-Blog</span>
       <span>Custom domain: zdhua.me</span>
-      <span>Astro + native JS/CSS</span>
+      <span>Inspired by Astro Sphere MIT</span>
     </footer>
     <script type="module" src="/scripts/console.js"></script>
   </body>
