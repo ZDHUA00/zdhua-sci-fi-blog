@@ -6,7 +6,9 @@ import SignalArt from '../components/SignalArt.astro';
 const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const featured = posts.find((post) => post.data.featured) ?? posts[0];
 const categories = ['All', ...Array.from(new Set(posts.map((post) => post.data.category)))];
+const tags = Array.from(new Set(posts.flatMap((post) => post.data.tags)));
 const base = import.meta.env.BASE_URL;
+const latestDate = featured.data.date.toISOString().slice(0, 10);
 const postData = posts.map((post) => ({
   slug: post.slug,
   title: post.data.title,
@@ -22,34 +24,48 @@ const postData = posts.map((post) => ({
 }));
 ---
 
-<BaseLayout title="ZDHUA.LOG | Sci-Fi Blog">
+<BaseLayout title="ZDHUA.LOG | 星际舰船档案控制台">
   <main>
     <section class="hero-section" aria-labelledby="heroTitle">
       <div class="hero-media" aria-hidden="true">
-        <div class="hero-orbit-system">
-          <span class="hero-core"></span>
-          <span class="hero-orbit hero-orbit-one"></span>
-          <span class="hero-orbit hero-orbit-two"></span>
-          <span class="hero-orbit hero-orbit-three"></span>
-          <span class="hero-comet"></span>
-        </div>
+        <div class="cockpit-horizon"></div>
+        <div class="cockpit-rail cockpit-rail-left"></div>
+        <div class="cockpit-rail cockpit-rail-right"></div>
       </div>
       <div class="hero-grid">
         <div class="hero-copy">
           <h1 id="heroTitle">ZDHUA.LOG</h1>
-          <p>
-            这里是我的私人星际档案馆：服务器、自动化、AI 工具链、部署记录和界面实验都会被整理成可追踪的日志。
-          </p>
+          <p>星舰个人档案控制台。把服务器、自动化、AI 工具链、部署记录和界面实验整理成可检索、可追踪的舰船日志。</p>
           <div class="hero-actions">
-            <a class="primary-link" href="#archive">进入文章库</a>
-            <a class="secondary-link" href={`${base}blog/${featured.slug}/`}>阅读最新日志</a>
+            <a class="primary-link" href="#archive">进入档案库</a>
+            <a class="secondary-link" href={`${base}blog/${featured.slug}/`}>读取最新日志</a>
+          </div>
+          <div class="command-readouts" aria-label="控制台状态">
+            <span>MODE / COMMAND</span>
+            <span>VISUAL / LIVE</span>
+            <span>AUDIO / TOP DROP</span>
           </div>
         </div>
 
-        <aside class="mission-panel" aria-label="博客状态">
+        <div class="bridge-viewport" aria-label="星图控制台">
+          <div class="viewport-map" aria-hidden="true">
+            <span class="map-core"></span>
+            <span class="map-orbit map-orbit-one"></span>
+            <span class="map-orbit map-orbit-two"></span>
+            <span class="map-orbit map-orbit-three"></span>
+            <span class="map-sweep"></span>
+          </div>
+          <div class="viewport-console">
+            <span>STELLAR MAP</span>
+            <strong>{featured.data.signal}</strong>
+            <small>{latestDate} / {featured.data.category}</small>
+          </div>
+        </div>
+
+        <aside class="mission-panel" aria-label="博客任务读数">
           <div class="panel-grid">
             <div>
-              <span>文章信号</span>
+              <span>日志信号</span>
               <strong>{String(posts.length).padStart(2, '0')}</strong>
             </div>
             <div>
@@ -57,41 +73,41 @@ const postData = posts.map((post) => ({
               <strong>{String(categories.length - 1).padStart(2, '0')}</strong>
             </div>
             <div>
-              <span>最新编号</span>
-              <strong>{featured.data.signal}</strong>
+              <span>标签节点</span>
+              <strong>{String(tags.length).padStart(2, '0')}</strong>
             </div>
           </div>
           <div class="orbit-readout">
             <span></span>
-            <p>Current orbit: engineering notes, deployment logs, automation systems.</p>
+            <p>Current mission: keep engineering notes readable while the interface feels like a working starship deck.</p>
           </div>
         </aside>
       </div>
     </section>
 
-    <section class="feature-strip" aria-label="设计状态">
+    <section class="feature-strip" aria-label="系统预览">
       <div>
-        <span>Galaxy</span>
-        <strong>Live canvas</strong>
+        <span>Deck</span>
+        <strong>舰桥首屏</strong>
+      </div>
+      <div>
+        <span>Signals</span>
+        <strong>动态文章视觉</strong>
       </div>
       <div>
         <span>Audio</span>
-        <strong>Playable BGM</strong>
-      </div>
-      <div>
-        <span>Cards</span>
-        <strong>dynamic visuals</strong>
+        <strong>顶部隐藏下拉</strong>
       </div>
       <div>
         <span>Runtime</span>
-        <strong>Astro + JS/CSS</strong>
+        <strong>Astro + 原生 JS</strong>
       </div>
     </section>
 
     <section class="featured-section" aria-labelledby="featuredTitle">
       <div class="section-heading">
-        <h2 id="featuredTitle">精选轨道</h2>
-        <p>把最近的部署、服务器和工具链记录放在前排，先看到上下文，再进入完整文章。</p>
+        <h2 id="featuredTitle">舰船日志</h2>
+        <p>最近的部署、服务器和工具链记录会被放在前排，像从舰桥终端读取任务日志。</p>
       </div>
       <div class="featured-grid">
         {posts.slice(0, 3).map((post, index) => (
@@ -107,8 +123,8 @@ const postData = posts.map((post) => ({
 
     <section class="archive-section" id="archive" aria-labelledby="archiveTitle" data-posts={JSON.stringify(postData)}>
       <div class="section-heading">
-        <h2 id="archiveTitle">文章库</h2>
-        <p>像控制台一样检索文章：搜索、分类、选择、预览，然后进入完整日志。</p>
+        <h2 id="archiveTitle">档案扫描</h2>
+        <p>搜索、分类、选择、预览都在同一个控制台内完成。选中日志时，右侧信号窗会同步切换。</p>
       </div>
       <div class="archive-controls" aria-label="文章筛选">
         <label class="search-box" for="searchInput">
@@ -162,55 +178,42 @@ const postData = posts.map((post) => ({
       </div>
     </section>
 
-    <section class="gallery-section" aria-labelledby="galleryTitle">
+    <section class="systems-section" id="systems" aria-labelledby="systemsTitle">
       <div class="section-heading">
-        <h2 id="galleryTitle">动态视觉场</h2>
-        <p>封面位不再只是静态图片，而是由原生 CSS 和 JavaScript 生成的轨道、扫描线、粒子和星系层。</p>
+        <h2 id="systemsTitle">舰桥系统</h2>
+        <p>这些系统不是装饰块，而是页面真实交互的入口：视觉、音频、性能和部署状态都可被验证。</p>
       </div>
-      <div class="gallery-grid">
-        <figure class="dynamic-window dynamic-window-console">
-          <div class="window-scene" aria-hidden="true">
+      <div class="systems-grid">
+        <article class="system-card system-card-wide">
+          <div class="system-window dynamic-window-console" aria-hidden="true">
             <span></span><span></span><span></span><span></span>
           </div>
-          <figcaption>ORBITAL CONSOLE</figcaption>
-        </figure>
-        <figure class="dynamic-window dynamic-window-archive">
-          <div class="window-scene" aria-hidden="true">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <figcaption>SIGNAL ARCHIVE</figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section class="lab-section" id="lab" aria-labelledby="labTitle">
-      <div class="section-heading">
-        <h2 id="labTitle">实验室</h2>
-        <p>博客不是单调文章墙，而是工程、部署、自动化、音乐和界面实验的工作台。</p>
-      </div>
-      <div class="lab-grid">
-        <article class="lab-card">
-          <div class="lab-code">OPS</div>
-          <h3>部署观测</h3>
-          <p>记录服务器、域名、容器和反代配置，方便每次改动都有上下文。</p>
+          <span class="lab-code">VISUAL</span>
+          <h3>动态信号窗</h3>
+          <p>文章视觉由 CSS 与 JS 生成，按分类切换颜色、轨道、扫描线和粒子，不再依赖普通静态封面。</p>
         </article>
-        <article class="lab-card">
-          <div class="lab-code">AUDIO</div>
-          <h3>背景音轨</h3>
-          <p>三段本地合成氛围音乐，支持播放、暂停、上一首、下一首、进度和音量。</p>
+        <article class="system-card">
+          <span class="lab-code">AUDIO</span>
+          <h3>顶部隐藏 BGM</h3>
+          <p>播放器从顶部展开，支持播放、暂停、切歌、进度、音量和 Web Audio 增益。</p>
         </article>
-        <article class="lab-card">
-          <div class="lab-code">UX</div>
-          <h3>界面实验</h3>
-          <p>保持科幻感，同时控制信息密度，避免动效遮挡阅读和操作。</p>
+        <article class="system-card">
+          <span class="lab-code">PERF</span>
+          <h3>低负载星图</h3>
+          <p>Canvas 限制 DPR、粒子数量和帧率，移动端自动降级，页面隐藏时暂停动画。</p>
+        </article>
+        <article class="system-card">
+          <span class="lab-code">DEPLOY</span>
+          <h3>GitHub Pages</h3>
+          <p>构建产物由 GitHub Actions 发布，`zdhua.me` 作为正式入口。</p>
         </article>
       </div>
     </section>
 
     <section class="timeline-section" id="timeline" aria-labelledby="timelineTitle">
       <div class="section-heading">
-        <h2 id="timelineTitle">时间线</h2>
-        <p>提交记录、发布日志和文章更新合并在同一条可追踪信号链里。</p>
+        <h2 id="timelineTitle">信号时间线</h2>
+        <p>日志按时间倒序排列，像舰船黑匣子一样保留每次工程调整的上下文。</p>
       </div>
       <ol class="timeline">
         {posts.slice(0, 5).map((post) => (

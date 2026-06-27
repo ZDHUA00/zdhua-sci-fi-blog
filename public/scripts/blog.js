@@ -58,7 +58,7 @@ function initSignalArt() {
     if (!(art instanceof HTMLElement) || art.dataset.enhanced === 'true') return;
     art.dataset.enhanced = 'true';
     const rand = seededRandom(`${art.dataset.signal || 'ZDHUA'}-${artIndex}`);
-    const count = art.classList.contains('featured-visual') ? 10 : 6;
+    const count = art.classList.contains('featured-visual') ? 8 : 4;
 
     for (let i = 0; i < count; i += 1) {
       const particle = document.createElement('span');
@@ -160,19 +160,20 @@ function initGalaxyCanvas() {
   let comets = [];
   let frame = 0;
   let lastFrame = 0;
+  let running = !document.hidden;
 
   const rand = seededRandom('zdhua-galaxy');
 
   const resize = () => {
-    dpr = Math.min(window.devicePixelRatio || 1, 1.35);
+    dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 760 ? 1 : 1.18);
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const fieldCount = Math.min(620, Math.max(220, Math.floor((width * height) / 3200)));
-    const armCount = Math.min(260, Math.max(120, Math.floor((width * height) / 9200)));
+    const fieldCount = Math.min(360, Math.max(150, Math.floor((width * height) / 5200)));
+    const armCount = Math.min(150, Math.max(72, Math.floor((width * height) / 14500)));
     const galaxyRadius = Math.max(width, height) * 0.58;
 
     fieldStars = Array.from({ length: fieldCount }, () => ({
@@ -199,7 +200,7 @@ function initGalaxyCanvas() {
       };
     });
 
-    comets = Array.from({ length: 3 }, (_, index) => ({
+    comets = Array.from({ length: width < 760 ? 1 : 2 }, (_, index) => ({
       x: rand() * width,
       y: rand() * height * 0.7,
       speed: 0.38 + rand() * 0.36,
@@ -225,7 +226,7 @@ function initGalaxyCanvas() {
     const radiusBase = Math.max(width, height) * 0.18;
     context.save();
     context.globalCompositeOperation = 'screen';
-    for (let i = 0; i < 8; i += 1) {
+    for (let i = 0; i < 5; i += 1) {
       const radius = radiusBase + i * Math.max(width, height) * 0.044;
       const start = (time * 0.00008 * (i % 2 ? -1 : 1)) + i * 0.72;
       const end = start + Math.PI * (0.82 + i * 0.035);
@@ -243,6 +244,10 @@ function initGalaxyCanvas() {
   };
 
   const draw = (time = 0) => {
+    if (!running) {
+      frame = 0;
+      return;
+    }
     if (!reduceMotion && time - lastFrame < 33) {
       frame = requestAnimationFrame(draw);
       return;
@@ -312,6 +317,16 @@ function initGalaxyCanvas() {
 
   resize();
   draw();
+  document.addEventListener('visibilitychange', () => {
+    running = !document.hidden;
+    if (running && !reduceMotion && frame === 0) {
+      lastFrame = 0;
+      frame = requestAnimationFrame(draw);
+    } else if (!running && frame) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+    }
+  });
   window.addEventListener('resize', resize);
   window.addEventListener('pointermove', (event) => {
     pointer.x = event.clientX;
@@ -368,6 +383,8 @@ function initAudioDock() {
   const toggle = document.querySelector('#audioDockToggle');
   const close = document.querySelector('#audioDockClose');
   const title = document.querySelector('#trackTitle');
+  const compactTitle = document.querySelector('#compactTrackTitle');
+  const compactStatus = document.querySelector('#compactAudioStatus');
   const mood = document.querySelector('#trackMood');
   const status = document.querySelector('#audioStatus');
   const time = document.querySelector('#trackTime');
@@ -382,6 +399,9 @@ function initAudioDock() {
   const setStatus = (message, state = 'idle') => {
     dock.dataset.state = state;
     if (status) status.textContent = message;
+    if (compactStatus) {
+      compactStatus.textContent = state === 'playing' ? 'FM LIVE' : state === 'loading' ? 'LOADING' : state === 'error' || state === 'blocked' ? 'CHECK' : 'FM READY';
+    }
   };
 
   const setOpen = (open) => {
@@ -393,7 +413,7 @@ function initAudioDock() {
 
   const gainValue = () => {
     if (volume instanceof HTMLInputElement) return Math.max(0, Number(volume.value) || 0);
-    return 1.35;
+    return 1.8;
   };
 
   const syncVolumeReadout = () => {
@@ -458,7 +478,7 @@ function initAudioDock() {
     const lfoGain = audioContext.createGain();
     const nodes = [];
 
-    master.gain.value = gainValue() * 0.34;
+    master.gain.value = gainValue() * 0.42;
     filter.type = 'lowpass';
     filter.frequency.value = 720;
     filter.Q.value = 0.55;
@@ -539,10 +559,11 @@ function initAudioDock() {
     audio.src = track.src;
     audio.load();
     if (title) title.textContent = track.title;
+    if (compactTitle) compactTitle.textContent = track.title;
     if (mood) mood.textContent = track.mood;
     if (time) time.textContent = '0:00';
     if (progress instanceof HTMLInputElement) progress.value = '0';
-    setStatus(shouldPlay ? '正在切换音轨...' : '点击播放，启动深空背景音', shouldPlay ? 'loading' : 'idle');
+    setStatus(shouldPlay ? '正在切换音轨...' : '点击播放，启动舰桥背景音', shouldPlay ? 'loading' : 'idle');
     syncPlayState();
     if (shouldPlay) requestPlayback();
   };
@@ -600,7 +621,7 @@ function initAudioDock() {
       audio.volume = Math.min(1, value);
     }
     if (synth) {
-      synth.master.gain.setTargetAtTime(value * 0.34, synth.context.currentTime, 0.02);
+      synth.master.gain.setTargetAtTime(value * 0.42, synth.context.currentTime, 0.02);
     }
   });
 

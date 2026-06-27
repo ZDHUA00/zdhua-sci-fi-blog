@@ -11,7 +11,7 @@ const {
   class: className = '',
 } = Astro.props;
 
-const categorySlug = category.toLowerCase().replace(/[^a-z0-9-]/g, '');
+const categorySlug = category.toLowerCase().replace(/[^a-z0-9-]/g, '') || 'deploy';
 ---
 
 <span
@@ -22,8 +22,12 @@ const categorySlug = category.toLowerCase().replace(/[^a-z0-9-]/g, '');
 >
   <span class="signal-art-grid"></span>
   <span class="signal-art-nebula"></span>
+  <span class="signal-art-horizon"></span>
   <span class="signal-art-ring signal-art-ring-one"></span>
   <span class="signal-art-ring signal-art-ring-two"></span>
+  <span class="signal-art-ring signal-art-ring-three"></span>
   <span class="signal-art-core"></span>
+  <span class="signal-art-beam signal-art-beam-one"></span>
+  <span class="signal-art-beam signal-art-beam-two"></span>
   <span class="signal-art-scan"></span>
 </span>

@@ -21,6 +21,7 @@ const base = import.meta.env.BASE_URL;
         <div class="article-cover">
           <SignalArt signal={post.data.signal} category={post.data.category} class="article-visual" />
         </div>
+        <span class="page-system-label">SHIP LOG / READING MODE</span>
         <span class="signal-line">{post.data.signal} / {post.data.category} / {post.data.readTime}</span>
         <h1>{post.data.title}</h1>
         <p>{post.data.description}</p>

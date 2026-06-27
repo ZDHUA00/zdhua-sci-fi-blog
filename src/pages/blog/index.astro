@@ -7,10 +7,11 @@ const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf()
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title="文章归档 | ZDHUA.LOG" description="ZDHUA.LOG 的全部文章归档。">
-  <main class="page-shell">
+<BaseLayout title="舰船日志归档 | ZDHUA.LOG" description="ZDHUA.LOG 的全部舰船日志归档。">
+  <main class="page-shell archive-page">
     <section class="page-hero">
-      <h1>文章归档</h1>
+      <span class="page-system-label">LOG ARCHIVE / FULL SCAN</span>
+      <h1>舰船日志归档</h1>
       <p>全部日志按时间倒序排列。每篇文章都是一条可追踪的工程信号，包含部署、服务器、自动化、AI 工具链和界面实验。</p>
     </section>
     <section class="archive-grid-page" aria-label="全部文章">
