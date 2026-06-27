@@ -58,7 +58,7 @@ function initSignalArt() {
     if (!(art instanceof HTMLElement) || art.dataset.enhanced === 'true') return;
     art.dataset.enhanced = 'true';
     const rand = seededRandom(`${art.dataset.signal || 'ZDHUA'}-${artIndex}`);
-    const count = art.classList.contains('featured-visual') ? 28 : 16;
+    const count = art.classList.contains('featured-visual') ? 10 : 6;
 
     for (let i = 0; i < count; i += 1) {
       const particle = document.createElement('span');
@@ -159,26 +159,27 @@ function initGalaxyCanvas() {
   let armStars = [];
   let comets = [];
   let frame = 0;
+  let lastFrame = 0;
 
   const rand = seededRandom('zdhua-galaxy');
 
   const resize = () => {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.35);
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const fieldCount = Math.min(1600, Math.max(520, Math.floor((width * height) / 1000)));
-    const armCount = Math.min(720, Math.max(260, Math.floor((width * height) / 3200)));
+    const fieldCount = Math.min(620, Math.max(220, Math.floor((width * height) / 3200)));
+    const armCount = Math.min(260, Math.max(120, Math.floor((width * height) / 9200)));
     const galaxyRadius = Math.max(width, height) * 0.58;
 
     fieldStars = Array.from({ length: fieldCount }, () => ({
       x: rand() * width,
       y: rand() * height,
-      size: 0.55 + rand() * 1.85,
-      alpha: 0.18 + rand() * 0.72,
+      size: 0.62 + rand() * 1.95,
+      alpha: 0.22 + rand() * 0.74,
       drift: 0.08 + rand() * 0.28,
       tone: rand(),
     }));
@@ -220,7 +221,33 @@ function initGalaxyCanvas() {
     context.fill();
   };
 
+  const drawTrails = (time, centerX, centerY) => {
+    const radiusBase = Math.max(width, height) * 0.18;
+    context.save();
+    context.globalCompositeOperation = 'screen';
+    for (let i = 0; i < 8; i += 1) {
+      const radius = radiusBase + i * Math.max(width, height) * 0.044;
+      const start = (time * 0.00008 * (i % 2 ? -1 : 1)) + i * 0.72;
+      const end = start + Math.PI * (0.82 + i * 0.035);
+      context.beginPath();
+      context.ellipse(centerX, centerY, radius, radius * (0.28 + i * 0.012), -0.22 + i * 0.035, start, end);
+      context.strokeStyle = i % 3 === 0
+        ? 'rgba(110, 248, 164, 0.13)'
+        : i % 3 === 1
+          ? 'rgba(38, 216, 255, 0.16)'
+          : 'rgba(255, 191, 95, 0.11)';
+      context.lineWidth = i < 3 ? 1.15 : 0.85;
+      context.stroke();
+    }
+    context.restore();
+  };
+
   const draw = (time = 0) => {
+    if (!reduceMotion && time - lastFrame < 33) {
+      frame = requestAnimationFrame(draw);
+      return;
+    }
+    lastFrame = time;
     context.clearRect(0, 0, width, height);
     const parallaxX = pointer.active ? (pointer.x - width / 2) * 0.012 : 0;
     const parallaxY = pointer.active ? (pointer.y - height / 2) * 0.012 : 0;
@@ -228,6 +255,7 @@ function initGalaxyCanvas() {
     const centerY = height * 0.38 + parallaxY;
 
     drawNebula(time, centerX, centerY);
+    drawTrails(time, centerX, centerY);
 
     for (const star of fieldStars) {
       if (!reduceMotion) {
@@ -325,22 +353,27 @@ function initAudioDock() {
   if (!(audio instanceof HTMLAudioElement)) return;
 
   audio.preload = 'auto';
-  audio.volume = 0.42;
+  audio.volume = 1;
   let index = 0;
   let seeking = false;
   let visualFrame = 0;
   let wantsPlayback = false;
   let audioContext = null;
+  let mediaSource = null;
+  let audioGain = null;
   let synth = null;
   let synthStart = 0;
   const synthDuration = 96;
 
+  const toggle = document.querySelector('#audioDockToggle');
+  const close = document.querySelector('#audioDockClose');
   const title = document.querySelector('#trackTitle');
   const mood = document.querySelector('#trackMood');
   const status = document.querySelector('#audioStatus');
   const time = document.querySelector('#trackTime');
   const progress = document.querySelector('#trackProgress');
   const volume = document.querySelector('#volumeControl');
+  const volumeReadout = document.querySelector('#volumeReadout');
   const play = document.querySelector('#playToggle');
   const prev = document.querySelector('#prevTrack');
   const next = document.querySelector('#nextTrack');
@@ -349,6 +382,39 @@ function initAudioDock() {
   const setStatus = (message, state = 'idle') => {
     dock.dataset.state = state;
     if (status) status.textContent = message;
+  };
+
+  const setOpen = (open) => {
+    dock.dataset.open = String(open);
+    toggle?.setAttribute('aria-expanded', String(open));
+    toggle?.setAttribute('aria-label', open ? '背景音乐面板已打开' : '打开背景音乐面板');
+    toggle?.setAttribute('title', open ? '背景音乐面板已打开' : '打开背景音乐面板');
+  };
+
+  const gainValue = () => {
+    if (volume instanceof HTMLInputElement) return Math.max(0, Number(volume.value) || 0);
+    return 1.35;
+  };
+
+  const syncVolumeReadout = () => {
+    dock.dataset.gain = gainValue().toFixed(2);
+    if (volumeReadout) volumeReadout.textContent = `${Math.round(gainValue() * 100)}%`;
+  };
+
+  const ensureAudioGraph = async () => {
+    const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextConstructor) return false;
+    if (!audioContext) audioContext = new AudioContextConstructor();
+    if (!mediaSource) {
+      mediaSource = audioContext.createMediaElementSource(audio);
+      audioGain = audioContext.createGain();
+      mediaSource.connect(audioGain);
+      audioGain.connect(audioContext.destination);
+    }
+    audio.volume = 1;
+    if (audioGain) audioGain.gain.setTargetAtTime(gainValue(), audioContext.currentTime, 0.015);
+    await audioContext.resume();
+    return true;
   };
 
   const isPlaying = () => Boolean(synth) || (!audio.paused && !audio.ended);
@@ -392,7 +458,7 @@ function initAudioDock() {
     const lfoGain = audioContext.createGain();
     const nodes = [];
 
-    master.gain.value = Number(volume?.value || 0.42) * 0.22;
+    master.gain.value = gainValue() * 0.34;
     filter.type = 'lowpass';
     filter.frequency.value = 720;
     filter.Q.value = 0.55;
@@ -443,10 +509,12 @@ function initAudioDock() {
   const requestPlayback = async () => {
     wantsPlayback = true;
     stopSynth();
+    setOpen(true);
     setStatus('正在加载本地音轨...', 'loading');
     syncPlayState();
 
     try {
+      await ensureAudioGraph();
       if (!audio.currentSrc) audio.load();
       await audio.play();
       setStatus(`正在播放：${tracks[index].title}`, 'playing');
@@ -525,9 +593,14 @@ function initAudioDock() {
   volume?.addEventListener('input', () => {
     if (!(volume instanceof HTMLInputElement)) return;
     const value = Number(volume.value);
-    audio.volume = value;
+    syncVolumeReadout();
+    if (audioGain && audioContext) {
+      audioGain.gain.setTargetAtTime(value, audioContext.currentTime, 0.02);
+    } else {
+      audio.volume = Math.min(1, value);
+    }
     if (synth) {
-      synth.master.gain.setTargetAtTime(value * 0.22, synth.context.currentTime, 0.02);
+      synth.master.gain.setTargetAtTime(value * 0.34, synth.context.currentTime, 0.02);
     }
   });
 
@@ -556,6 +629,12 @@ function initAudioDock() {
   });
 
   setTrack(0, false);
+  syncVolumeReadout();
+  toggle?.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
+  close?.addEventListener('click', () => setOpen(false));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setOpen(false);
+  });
   animateBars();
   window.addEventListener('beforeunload', () => {
     cancelAnimationFrame(visualFrame);
