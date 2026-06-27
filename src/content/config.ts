@@ -8,7 +8,7 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     channel: z.string(),
-    status: z.string().default('ONLINE'),
+    status: z.string().default('已发布'),
     intensity: z.number().min(0).max(100).default(64),
     accent: z.enum(['cyan', 'green', 'amber', 'magenta']).default('cyan'),
     readTime: z.string().default('4 min'),

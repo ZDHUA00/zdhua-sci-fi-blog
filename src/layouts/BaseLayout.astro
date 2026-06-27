@@ -10,8 +10,8 @@ interface Props {
 }
 
 const {
-  title = 'ZDHUA-Blog | Personal Portfolio and Blog',
-  description = 'ZDHUA-Blog 是一个个人作品集与技术博客，记录前端、部署、AI 工具和界面实验。',
+  title = 'ZDHUA-Blog | 个人作品集与技术博客',
+  description = 'ZDHUA-Blog 是一个个人作品集与技术博客，记录前端、部署、AI 工具、自动化和界面实验。',
   active = 'home',
 } = Astro.props;
 
@@ -39,18 +39,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://zdhua.me');
         <span>ZDHUA-Blog</span>
       </a>
       <nav class="site-nav" aria-label="主导航">
-        <a href="/" aria-current={active === 'home' ? 'page' : undefined}>Home</a>
-        <a href="/projects/" aria-current={active === 'projects' ? 'page' : undefined}>Projects</a>
-        <a href="/blog/" aria-current={active === 'blog' ? 'page' : undefined}>Blog</a>
-        <a href="https://github.com/ZDHUA00" rel="noreferrer">GitHub</a>
+        <a href="/" aria-current={active === 'home' ? 'page' : undefined}>首页</a>
+        <a href="/projects/" aria-current={active === 'projects' ? 'page' : undefined}>项目</a>
+        <a href="/blog/" aria-current={active === 'blog' ? 'page' : undefined}>文章</a>
+        <a href="https://github.com/ZDHUA00" rel="noreferrer">仓库</a>
       </nav>
       <AudioControl />
     </header>
     <slot />
     <footer class="site-footer">
       <span>ZDHUA-Blog</span>
-      <span>Custom domain: zdhua.me</span>
-      <span>Inspired by Astro Sphere MIT</span>
+      <span>域名：zdhua.me</span>
+      <span>Astro Sphere 风格改造 · Astro + 原生 JS/CSS</span>
     </footer>
     <script type="module" src="/scripts/console.js"></script>
   </body>

@@ -4,7 +4,7 @@ description: "记录 GitHub Pages、自定义域名、CNAME 和 Astro base/site 
 pubDate: 2026-06-26
 tags: ["部署", "GitHub Pages", "域名"]
 channel: "DEPLOY-03"
-status: "READY"
+status: "稳定"
 intensity: 66
 accent: "amber"
 readTime: "4 min"

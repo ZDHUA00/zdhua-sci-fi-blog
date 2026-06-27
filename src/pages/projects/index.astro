@@ -5,24 +5,34 @@ import { projects } from '../../data/projects';
 
 <BaseLayout
   active="projects"
-  title="Projects | ZDHUA-Blog"
-  description="ZDHUA-Blog 的项目、实验和部署记录。"
+  title="项目 | ZDHUA-Blog"
+  description="ZDHUA-Blog 的项目、界面实验、部署记录和音乐播放器模块。"
 >
   <main id="main">
     <section class="archive-hero">
-      <h1>Projects</h1>
-      <p>这里放个人项目、界面实验、部署记录和后续会继续扩展的作品集。</p>
+      <h1>项目实验室</h1>
+      <p>这里展示这个站点正在迭代的功能、设计实验和部署模块。后续有新的页面、工具或开源项目，也会继续放到这里。</p>
     </section>
 
-    <section class="project-grid">
+    <section class="project-grid project-grid--large">
       {projects.map((project) => (
         <article class={`project-card project-card--${project.accent}`}>
           <div class="project-card__top">
             <span>{project.status}</span>
             <strong>{project.year}</strong>
           </div>
+          <div class="project-orbit" aria-hidden="true">
+            <span></span>
+          </div>
           <h2>{project.title}</h2>
+          <p class="project-subtitle">{project.subtitle}</p>
           <p>{project.description}</p>
+          <div class="project-progress">
+            <span style={`width: ${project.progress}%`}></span>
+          </div>
+          <div class="metric-row">
+            {project.metrics.map((item) => <span>{item}</span>)}
+          </div>
           <div class="tag-line">
             {project.stack.map((item) => <span>{item}</span>)}
           </div>

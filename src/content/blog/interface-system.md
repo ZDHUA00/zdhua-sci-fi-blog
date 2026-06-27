@@ -4,7 +4,7 @@ description: "科幻感不是把所有元素都发光，而是让背景、动效
 pubDate: 2026-06-25
 tags: ["前端", "CSS", "界面设计"]
 channel: "UI-04"
-status: "ONLINE"
+status: "已发布"
 intensity: 78
 accent: "magenta"
 readTime: "5 min"

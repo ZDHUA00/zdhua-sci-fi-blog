@@ -4,7 +4,7 @@ description: "把站点从单纯博客改成个人品牌主页：有介绍、有
 pubDate: 2026-06-28
 tags: ["个人主页", "Astro", "设计"]
 channel: "HOME-01"
-status: "LIVE"
+status: "已上线"
 intensity: 82
 accent: "green"
 readTime: "4 min"

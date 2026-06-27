@@ -7,8 +7,15 @@ import { projects } from '../data/projects';
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
-const recentPosts = posts.slice(0, 3);
-const recentProjects = projects.slice(0, 3);
+const recentPosts = posts.slice(0, 4);
+const featuredPosts = posts.slice(0, 3);
+const recentProjects = projects;
+const logs = [
+  { date: '06/28', title: '导航与内容中文化', text: '顶部状态栏、项目页、文章页和播放器改为中文表达。' },
+  { date: '06/28', title: '音乐播放器升级', text: 'BGM 改为曲目式音乐播放器，支持三种旋律与实时波形。' },
+  { date: '06/27', title: 'Astro Sphere 方向', text: '站点结构转为个人主页 + 项目 + 博客的组合。' },
+  { date: '06/26', title: 'zdhua.me 部署', text: 'GitHub Pages 与自定义域名部署链路完成验证。' },
+];
 ---
 
 <BaseLayout active="home">
@@ -18,32 +25,71 @@ const recentProjects = projects.slice(0, 3);
         <div class="planet-glow"></div>
       </div>
       <div class="sphere-hero__content">
-        <p class="hero-intro">Hello, I am building</p>
+        <p class="hero-intro">欢迎来到我的个人空间</p>
         <h1>ZDHUA-Blog</h1>
         <p class="hero-subtitle">
-          一个个人作品集与技术博客，记录前端开发、网站部署、AI 工具、自动化流程和带一点深空感的界面实验。
+          这里是我的个人作品集与技术博客，记录网站部署、前端界面、AI 工具、自动化流程和正在迭代的项目实验。
         </p>
         <div class="hero__actions">
-          <a class="primary-action" href="/blog/">Read the blog</a>
-          <a class="secondary-action" href="/projects/">View projects</a>
+          <a class="primary-action" href="/blog/">阅读文章</a>
+          <a class="secondary-action" href="/projects/">查看项目</a>
         </div>
       </div>
     </section>
 
-    <div class="sphere-content">
-      <section class="profile-section">
+    <section class="status-strip" aria-label="站点状态">
+      <div>
+        <span>站点状态</span>
+        <strong>在线</strong>
+      </div>
+      <div>
+        <span>部署平台</span>
+        <strong>GitHub Pages</strong>
+      </div>
+      <div>
+        <span>域名</span>
+        <strong>zdhua.me</strong>
+      </div>
+      <div>
+        <span>当前版本</span>
+        <strong>作品集 + 博客</strong>
+      </div>
+    </section>
+
+    <div class="sphere-content sphere-content--wide">
+      <section class="profile-section profile-section--framed">
         <p>
-          我是 ZDHUA，正在把这个站点打造成一个长期维护的个人主页。这里不会只放普通文章列表，也会记录我做过的项目、部署经验、工具实验和界面设计想法。
+          我是 ZDHUA，正在把这个站点打造成一个长期维护的个人主页。它不只是文章列表，也会展示项目、界面实验、部署经验、工具笔记和每次优化的日志。
         </p>
         <p>
-          这个版本采用 <strong>Astro Sphere</strong> 的开源思路：轻量、现代、个人品牌优先。视觉上保留黑色星空、轨道、信号图和 BGM 控制，但页面结构会更像成熟作品集。
+          这个版本参考 Astro Sphere 的开源结构：个人品牌优先，内容清楚，项目和博客并列展示。视觉上保留深空星域、轨道弧线、信号图和顶部隐藏音乐播放器。
         </p>
+      </section>
+
+      <section class="feature-grid">
+        <div class="section-heading">
+          <h2>精选文章</h2>
+          <a href="/blog/">全部文章</a>
+        </div>
+        <div class="featured-posts">
+          {featuredPosts.map((post) => (
+            <article class={`feature-card feature-card--${post.data.accent}`}>
+              <PostSignal seed={post.slug} accent={post.data.accent} intensity={post.data.intensity} />
+              <div>
+                <span>{post.data.channel}</span>
+                <h3>{post.data.title}</h3>
+                <p>{post.data.description}</p>
+                <a href={`/blog/${post.slug}/`}>阅读全文</a>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section class="list-section">
         <div class="section-heading">
-          <h2>Recent posts</h2>
-          <a href="/blog/">All posts</a>
+          <h2>最新文章</h2>
+          <a href="/blog/">文章归档</a>
         </div>
         <div class="arrow-list">
           {recentPosts.map((post) => (
@@ -60,12 +106,13 @@ const recentProjects = projects.slice(0, 3);
       </section>
 
       <section class="stack-section">
-        <h2>Website built with</h2>
+        <h2>站点技术栈</h2>
         <div class="stack-grid">
           <span>Astro</span>
           <span>Markdown</span>
-          <span>Native JS</span>
+          <span>原生 JavaScript</span>
           <span>CSS Motion</span>
+          <span>Web Audio</span>
           <span>GitHub Pages</span>
           <span>zdhua.me</span>
         </div>
@@ -73,8 +120,8 @@ const recentProjects = projects.slice(0, 3);
 
       <section class="list-section">
         <div class="section-heading">
-          <h2>Recent projects</h2>
-          <a href="/projects/">All projects</a>
+          <h2>项目实验室</h2>
+          <a href="/projects/">全部项目</a>
         </div>
         <div class="project-preview-grid">
           {recentProjects.map((project) => (
@@ -83,8 +130,18 @@ const recentProjects = projects.slice(0, 3);
                 <span>{project.status}</span>
                 <strong>{project.year}</strong>
               </div>
+              <div class="project-orbit" aria-hidden="true">
+                <span></span>
+              </div>
               <h3>{project.title}</h3>
+              <p class="project-subtitle">{project.subtitle}</p>
               <p>{project.description}</p>
+              <div class="project-progress">
+                <span style={`width: ${project.progress}%`}></span>
+              </div>
+              <div class="metric-row">
+                {project.metrics.map((item) => <span>{item}</span>)}
+              </div>
               <div class="tag-line">
                 {project.stack.map((item) => <span>{item}</span>)}
               </div>
@@ -94,11 +151,29 @@ const recentProjects = projects.slice(0, 3);
         </div>
       </section>
 
+      <section class="log-section">
+        <div class="section-heading">
+          <h2>更新日志</h2>
+          <span>持续记录站点变化</span>
+        </div>
+        <div class="log-timeline">
+          {logs.map((log) => (
+            <article class="log-entry">
+              <time>{log.date}</time>
+              <div>
+                <h3>{log.title}</h3>
+                <p>{log.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section class="visual-section">
         <div>
-          <h2>Signal visual system</h2>
+          <h2>Log 视觉系统</h2>
           <p>
-            每篇文章仍然保留独立的信号图，但它现在是作品集体系的一部分，而不是单纯装饰。后续可以继续扩展成项目封面、技术栈标识和搜索动效。
+            文章不再只是普通标题列表。每篇文章都有频道编号、标签、信号强度和动态信号图，后续可以继续扩展成搜索、分类和项目封面系统。
           </p>
         </div>
         <PostSignal seed="zdhua-blog-sphere" accent="green" intensity={78} />
