@@ -5,14 +5,13 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    date: z.coerce.date(),
-    category: z.enum(['Deploy', 'Ops', 'Automation', 'Design', 'AI']),
-    tags: z.array(z.string()),
-    readTime: z.string(),
-    signal: z.string(),
-    cover: z.string(),
-    coverAlt: z.string(),
-    featured: z.boolean().default(false),
+    pubDate: z.coerce.date(),
+    tags: z.array(z.string()).default([]),
+    channel: z.string(),
+    status: z.string().default('ONLINE'),
+    intensity: z.number().min(0).max(100).default(64),
+    accent: z.enum(['cyan', 'green', 'amber', 'magenta']).default('cyan'),
+    readTime: z.string().default('4 min'),
   }),
 });
 

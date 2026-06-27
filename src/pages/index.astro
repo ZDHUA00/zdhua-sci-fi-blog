@@ -1,228 +1,99 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SignalArt from '../components/SignalArt.astro';
+import PostSignal from '../components/PostSignal.astro';
 
-const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const featured = posts.find((post) => post.data.featured) ?? posts[0];
-const categories = ['All', ...Array.from(new Set(posts.map((post) => post.data.category)))];
-const tags = Array.from(new Set(posts.flatMap((post) => post.data.tags)));
-const base = import.meta.env.BASE_URL;
-const latestDate = featured.data.date.toISOString().slice(0, 10);
-const postData = posts.map((post) => ({
-  slug: post.slug,
-  title: post.data.title,
-  category: post.data.category,
-  date: post.data.date.toISOString().slice(0, 10),
-  readTime: post.data.readTime,
-  signal: post.data.signal,
-  description: post.data.description,
-  tags: post.data.tags,
-  cover: `${base}${post.data.cover}`,
-  coverAlt: post.data.coverAlt,
-  url: `${base}blog/${post.slug}/`,
-}));
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const featured = posts.slice(0, 3);
 ---
 
-<BaseLayout title="ZDHUA.LOG | 星际舰船档案控制台">
-  <main>
-    <section class="hero-section" aria-labelledby="heroTitle">
-      <div class="hero-media" aria-hidden="true">
-        <div class="cockpit-horizon"></div>
-        <div class="cockpit-rail cockpit-rail-left"></div>
-        <div class="cockpit-rail cockpit-rail-right"></div>
+<BaseLayout active="home">
+  <main id="main">
+    <section class="hero" data-console-tilt>
+      <div class="hero__copy">
+        <h1>ZDHUA.LOG</h1>
+        <p>
+          一座面向个人技术记录的星际舰船控制台。部署、自动化、AI 工具、界面实验都被整理成可扫描的航行日志。
+        </p>
+        <div class="hero__actions">
+          <a class="primary-action" href="/blog/">打开档案舱</a>
+          <a class="secondary-action" href="#latest">查看最新信号</a>
+        </div>
       </div>
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <h1 id="heroTitle">ZDHUA.LOG</h1>
-          <p>星舰个人档案控制台。把服务器、自动化、AI 工具链、部署记录和界面实验整理成可检索、可追踪的舰船日志。</p>
-          <div class="hero-actions">
-            <a class="primary-link" href="#archive">进入档案库</a>
-            <a class="secondary-link" href={`${base}blog/${featured.slug}/`}>读取最新日志</a>
-          </div>
-          <div class="command-readouts" aria-label="控制台状态">
-            <span>MODE / COMMAND</span>
-            <span>VISUAL / LIVE</span>
-            <span>AUDIO / TOP DROP</span>
+
+      <div class="cockpit" aria-label="星舰控制台状态">
+        <div class="cockpit__viewport">
+          <div class="reticle" aria-hidden="true"></div>
+          <div class="trajectory trajectory--one" aria-hidden="true"></div>
+          <div class="trajectory trajectory--two" aria-hidden="true"></div>
+          <div class="cockpit__readout">
+            <span>ORBIT</span>
+            <strong>zdhua.me</strong>
           </div>
         </div>
-
-        <div class="bridge-viewport" aria-label="星图控制台">
-          <div class="viewport-map" aria-hidden="true">
-            <span class="map-core"></span>
-            <span class="map-orbit map-orbit-one"></span>
-            <span class="map-orbit map-orbit-two"></span>
-            <span class="map-orbit map-orbit-three"></span>
-            <span class="map-sweep"></span>
-          </div>
-          <div class="viewport-console">
-            <span>STELLAR MAP</span>
-            <strong>{featured.data.signal}</strong>
-            <small>{latestDate} / {featured.data.category}</small>
-          </div>
+        <div class="cockpit__rail">
+          <span>CORE</span>
+          <b>97%</b>
+          <span>SYNC</span>
+          <b>ACTIVE</b>
+          <span>BUILD</span>
+          <b>ASTRO</b>
         </div>
-
-        <aside class="mission-panel" aria-label="博客任务读数">
-          <div class="panel-grid">
-            <div>
-              <span>日志信号</span>
-              <strong>{String(posts.length).padStart(2, '0')}</strong>
-            </div>
-            <div>
-              <span>主题轨道</span>
-              <strong>{String(categories.length - 1).padStart(2, '0')}</strong>
-            </div>
-            <div>
-              <span>标签节点</span>
-              <strong>{String(tags.length).padStart(2, '0')}</strong>
-            </div>
-          </div>
-          <div class="orbit-readout">
-            <span></span>
-            <p>Current mission: keep engineering notes readable while the interface feels like a working starship deck.</p>
-          </div>
-        </aside>
       </div>
     </section>
 
-    <section class="feature-strip" aria-label="系统预览">
-      <div>
-        <span>Deck</span>
-        <strong>舰桥首屏</strong>
+    <section class="systems">
+      <div class="system-panel system-panel--green">
+        <span>01</span>
+        <h2>轻量星域</h2>
+        <p>Canvas 限制 DPR 和帧率，页面隐藏时暂停，移动端减少粒子数量。</p>
       </div>
-      <div>
-        <span>Signals</span>
-        <strong>动态文章视觉</strong>
+      <div class="system-panel system-panel--amber">
+        <span>02</span>
+        <h2>隐藏广播</h2>
+        <p>顶部下拉式 BGM，Web Audio 合成音轨，音量上限提升到 500%。</p>
       </div>
-      <div>
-        <span>Audio</span>
-        <strong>顶部隐藏下拉</strong>
-      </div>
-      <div>
-        <span>Runtime</span>
-        <strong>Astro + 原生 JS</strong>
+      <div class="system-panel system-panel--magenta">
+        <span>03</span>
+        <h2>动态档案</h2>
+        <p>每篇文章用种子生成独立信号图，不依赖单调静态封面。</p>
       </div>
     </section>
 
-    <section class="featured-section" aria-labelledby="featuredTitle">
+    <section class="latest" id="latest">
       <div class="section-heading">
-        <h2 id="featuredTitle">舰船日志</h2>
-        <p>最近的部署、服务器和工具链记录会被放在前排，像从舰桥终端读取任务日志。</p>
+        <h2>最新航行日志</h2>
+        <a href="/blog/">全部档案</a>
       </div>
-      <div class="featured-grid">
-        {posts.slice(0, 3).map((post, index) => (
-          <a class:list={['featured-card', index === 0 && 'featured-card-large']} href={`${base}blog/${post.slug}/`}>
-            <SignalArt signal={post.data.signal} category={post.data.category} class="featured-visual" />
-            <span class="signal-line">{post.data.signal} / {post.data.category}</span>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.description}</p>
-          </a>
-        ))}
-      </div>
-    </section>
-
-    <section class="archive-section" id="archive" aria-labelledby="archiveTitle" data-posts={JSON.stringify(postData)}>
-      <div class="section-heading">
-        <h2 id="archiveTitle">档案扫描</h2>
-        <p>搜索、分类、选择、预览都在同一个控制台内完成。选中日志时，右侧信号窗会同步切换。</p>
-      </div>
-      <div class="archive-controls" aria-label="文章筛选">
-        <label class="search-box" for="searchInput">
-          <span aria-hidden="true"></span>
-          <input id="searchInput" type="search" placeholder="搜索标题、标签或摘要" autocomplete="off" />
-        </label>
-        <div class="filter-tabs" id="filterTabs" role="tablist" aria-label="分类筛选">
-          {categories.map((category) => (
-            <button type="button" role="tab" aria-selected={category === 'All'} data-category={category}>
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div class="archive-layout">
-        <div class="archive-list" id="archiveList">
-          {posts.map((post, index) => (
-            <button
-              class:list={['archive-card', index === 0 && 'active']}
-              type="button"
-              data-index={index}
-              data-category={post.data.category}
-              data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(' ')}`}
-            >
-              <SignalArt signal={post.data.signal} category={post.data.category} class="archive-visual" />
-              <span>
-                <span class="signal-line">{post.data.signal} / {post.data.category}</span>
+      <div class="latest-grid">
+        {featured.map((post) => (
+          <article class={`log-card log-card--${post.data.accent}`} data-log-card>
+            <a href={`/blog/${post.slug}/`} aria-label={`阅读 ${post.data.title}`}>
+              <PostSignal seed={post.slug} accent={post.data.accent} intensity={post.data.intensity} />
+              <div class="log-card__body">
+                <div class="log-card__meta">
+                  <span>{post.data.channel}</span>
+                  <time datetime={post.data.pubDate.toISOString()}>{post.data.pubDate.toLocaleDateString('zh-CN')}</time>
+                </div>
                 <h3>{post.data.title}</h3>
                 <p>{post.data.description}</p>
-                <span class="card-meta">
-                  <span>{post.data.date.toISOString().slice(0, 10)}</span>
-                  <span>{post.data.readTime}</span>
-                  {post.data.tags.map((tag) => <span>{tag}</span>)}
-                </span>
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <article class="reader-panel" id="readerPanel" aria-labelledby="readerTitle">
-          <SignalArt signal={featured.data.signal} category={featured.data.category} class="reader-visual" />
-          <div class="reader-meta" id="readerMeta">{featured.data.signal} / {featured.data.category}</div>
-          <h3 id="readerTitle">{featured.data.title}</h3>
-          <p id="readerExcerpt">{featured.data.description}</p>
-          <div class="reader-tags" id="readerTags">
-            {featured.data.tags.map((tag) => <span>{tag}</span>)}
-          </div>
-          <a class="reader-link" id="readerLink" href={`${base}blog/${featured.slug}/`}>打开完整日志</a>
-        </article>
-      </div>
-    </section>
-
-    <section class="systems-section" id="systems" aria-labelledby="systemsTitle">
-      <div class="section-heading">
-        <h2 id="systemsTitle">舰桥系统</h2>
-        <p>这些系统不是装饰块，而是页面真实交互的入口：视觉、音频、性能和部署状态都可被验证。</p>
-      </div>
-      <div class="systems-grid">
-        <article class="system-card system-card-wide">
-          <div class="system-window dynamic-window-console" aria-hidden="true">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <span class="lab-code">VISUAL</span>
-          <h3>动态信号窗</h3>
-          <p>文章视觉由 CSS 与 JS 生成，按分类切换颜色、轨道、扫描线和粒子，不再依赖普通静态封面。</p>
-        </article>
-        <article class="system-card">
-          <span class="lab-code">AUDIO</span>
-          <h3>顶部隐藏 BGM</h3>
-          <p>播放器从顶部展开，支持播放、暂停、切歌、进度、音量和 Web Audio 增益。</p>
-        </article>
-        <article class="system-card">
-          <span class="lab-code">PERF</span>
-          <h3>低负载星图</h3>
-          <p>Canvas 限制 DPR、粒子数量和帧率，移动端自动降级，页面隐藏时暂停动画。</p>
-        </article>
-        <article class="system-card">
-          <span class="lab-code">DEPLOY</span>
-          <h3>GitHub Pages</h3>
-          <p>构建产物由 GitHub Actions 发布，`zdhua.me` 作为正式入口。</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="timeline-section" id="timeline" aria-labelledby="timelineTitle">
-      <div class="section-heading">
-        <h2 id="timelineTitle">信号时间线</h2>
-        <p>日志按时间倒序排列，像舰船黑匣子一样保留每次工程调整的上下文。</p>
-      </div>
-      <ol class="timeline">
-        {posts.slice(0, 5).map((post) => (
-          <li>
-            <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
-            <a href={`${base}blog/${post.slug}/`}>{post.data.title}</a>
-          </li>
+              </div>
+            </a>
+          </article>
         ))}
-      </ol>
+      </div>
+    </section>
+
+    <section class="manifest">
+      <div>
+        <h2>重建目标</h2>
+        <p>
+          保留 GitHub Pages 与自定义域名，把博客重新做成一台有层次的舰船操作界面：先有视觉冲击，再保证阅读、筛选、播放和移动端都顺滑。
+        </p>
+      </div>
+      <a class="primary-action" href="/blog/">进入日志索引</a>
     </section>
   </main>
 </BaseLayout>

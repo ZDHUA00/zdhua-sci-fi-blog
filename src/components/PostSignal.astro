@@ -1,0 +1,19 @@
+---
+interface Props {
+  seed: string;
+  accent?: 'cyan' | 'green' | 'amber' | 'magenta';
+  intensity?: number;
+  label?: string;
+}
+
+const { seed, accent = 'cyan', intensity = 64, label = 'signal visual' } = Astro.props;
+---
+
+<canvas
+  class="signal-canvas"
+  data-signal
+  data-seed={seed}
+  data-accent={accent}
+  data-intensity={intensity}
+  aria-label={label}
+></canvas>

@@ -1,0 +1,28 @@
+<div class="audio-dock" data-audio-dock>
+  <button class="audio-trigger" type="button" data-audio-toggle aria-expanded="false" aria-controls="audio-panel" title="BGM 控制">
+    <span class="audio-trigger__icon" aria-hidden="true"></span>
+    <span class="audio-trigger__text">BGM</span>
+  </button>
+  <div class="audio-panel" id="audio-panel" data-audio-panel hidden>
+    <div class="audio-panel__top">
+      <strong>舰桥广播</strong>
+      <span data-audio-state>STANDBY</span>
+    </div>
+    <canvas class="audio-scope" width="320" height="64" data-audio-scope aria-hidden="true"></canvas>
+    <div class="audio-controls">
+      <button class="console-button" type="button" data-audio-play>启动</button>
+      <label class="range-field">
+        <span>音量 <b data-audio-volume-readout>260%</b></span>
+        <input type="range" data-audio-volume min="0" max="500" value="260" />
+      </label>
+      <label class="select-field">
+        <span>声道</span>
+        <select data-audio-track>
+          <option value="drive">Warp Drive</option>
+          <option value="relay">Deep Relay</option>
+          <option value="cascade">Signal Cascade</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</div>
