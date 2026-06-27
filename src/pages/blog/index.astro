@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SignalArt from '../../components/SignalArt.astro';
 
 const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const base = import.meta.env.BASE_URL;
@@ -15,7 +16,7 @@ const base = import.meta.env.BASE_URL;
     <section class="archive-grid-page" aria-label="全部文章">
       {posts.map((post, index) => (
         <a class="post-tile" href={`${base}blog/${post.slug}/`}>
-          <img src={`${base}${post.data.cover}`} alt={post.data.coverAlt} loading={index < 2 ? 'eager' : 'lazy'} />
+          <SignalArt signal={post.data.signal} category={post.data.category} class="tile-visual" />
           <span class="signal-line">{post.data.signal} / {post.data.category}</span>
           <h2>{post.data.title}</h2>
           <p>{post.data.description}</p>

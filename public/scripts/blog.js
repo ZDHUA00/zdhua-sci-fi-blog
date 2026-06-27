@@ -22,6 +22,56 @@ function initCursorGlow() {
   });
 }
 
+function categoryClass(category = '') {
+  const slug = String(category).toLowerCase().replace(/[^a-z0-9-]/g, '');
+  return `signal-art-${slug || 'deploy'}`;
+}
+
+function setSignalVisual(element, post) {
+  if (!(element instanceof HTMLElement) || !post) return;
+  for (const name of Array.from(element.classList)) {
+    if (name.startsWith('signal-art-') && name !== 'signal-art') {
+      element.classList.remove(name);
+    }
+  }
+  element.classList.add(categoryClass(post.category));
+  element.dataset.signal = post.signal || 'NO SIGNAL';
+  element.dataset.category = post.category || 'Design';
+}
+
+function seededRandom(seedText) {
+  let seed = 2166136261;
+  for (let i = 0; i < seedText.length; i += 1) {
+    seed ^= seedText.charCodeAt(i);
+    seed = Math.imul(seed, 16777619);
+  }
+  return () => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822507);
+    seed = Math.imul(seed ^ (seed >>> 13), 3266489909);
+    seed ^= seed >>> 16;
+    return (seed >>> 0) / 4294967296;
+  };
+}
+
+function initSignalArt() {
+  document.querySelectorAll('.signal-art').forEach((art, artIndex) => {
+    if (!(art instanceof HTMLElement) || art.dataset.enhanced === 'true') return;
+    art.dataset.enhanced = 'true';
+    const rand = seededRandom(`${art.dataset.signal || 'ZDHUA'}-${artIndex}`);
+    const count = art.classList.contains('featured-visual') ? 28 : 16;
+
+    for (let i = 0; i < count; i += 1) {
+      const particle = document.createElement('span');
+      particle.className = 'signal-particle';
+      particle.style.setProperty('--x', `${Math.round(8 + rand() * 84)}%`);
+      particle.style.setProperty('--y', `${Math.round(10 + rand() * 78)}%`);
+      particle.style.setProperty('--size', `${(2 + rand() * 3.8).toFixed(2)}px`);
+      particle.style.setProperty('--delay', `${(-rand() * 4.6).toFixed(2)}s`);
+      art.appendChild(particle);
+    }
+  });
+}
+
 function initArchive() {
   const archive = document.querySelector('[data-posts]');
   if (!archive) return;
@@ -30,7 +80,7 @@ function initArchive() {
   const cards = Array.from(document.querySelectorAll('.archive-card[data-index]'));
   const tabs = Array.from(document.querySelectorAll('#filterTabs button[data-category]'));
   const search = document.querySelector('#searchInput');
-  const readerCover = document.querySelector('#readerCover');
+  const readerVisual = document.querySelector('#readerPanel .reader-visual');
   const readerMeta = document.querySelector('#readerMeta');
   const readerTitle = document.querySelector('#readerTitle');
   const readerExcerpt = document.querySelector('#readerExcerpt');
@@ -43,10 +93,7 @@ function initArchive() {
     const post = posts[index];
     if (!post || !readerMeta || !readerTitle || !readerExcerpt || !readerTags || !readerLink) return;
     activeIndex = index;
-    if (readerCover instanceof HTMLImageElement) {
-      readerCover.src = post.cover;
-      readerCover.alt = post.coverAlt;
-    }
+    setSignalVisual(readerVisual, post);
     readerMeta.textContent = `${post.signal} / ${post.category} / ${post.readTime}`;
     readerTitle.textContent = post.title;
     readerExcerpt.textContent = post.description;
@@ -74,10 +121,7 @@ function initArchive() {
 
     if (firstVisible !== null && cards[activeIndex]?.hidden) updateReader(firstVisible);
     if (firstVisible === null && readerTitle && readerExcerpt && readerTags && readerMeta) {
-      if (readerCover instanceof HTMLImageElement) {
-        readerCover.removeAttribute('src');
-        readerCover.alt = '';
-      }
+      setSignalVisual(readerVisual, { signal: 'NO SIGNAL', category: 'Design' });
       readerMeta.textContent = 'NO SIGNAL';
       readerTitle.textContent = '没有匹配文章';
       readerExcerpt.textContent = '换一个关键词或分类再试。';
@@ -100,47 +144,153 @@ function initArchive() {
   search?.addEventListener('input', applyFilters);
 }
 
-function initStarfield() {
+function initGalaxyCanvas() {
   const canvas = document.querySelector('#starCanvas');
   if (!(canvas instanceof HTMLCanvasElement)) return;
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d', { alpha: true });
   if (!context) return;
+
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pointer = { x: 0, y: 0, active: false };
   let width = 0;
   let height = 0;
-  let stars = [];
+  let dpr = 1;
+  let fieldStars = [];
+  let armStars = [];
+  let comets = [];
+  let frame = 0;
+
+  const rand = seededRandom('zdhua-galaxy');
 
   const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    width = canvas.width = Math.floor(window.innerWidth * dpr);
-    height = canvas.height = Math.floor(window.innerHeight * dpr);
-    const count = Math.min(190, Math.floor((width * height) / 24000));
-    stars = Array.from({ length: count }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      z: 0.2 + Math.random() * 0.8,
-      tone: Math.random(),
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const fieldCount = Math.min(1600, Math.max(520, Math.floor((width * height) / 1000)));
+    const armCount = Math.min(720, Math.max(260, Math.floor((width * height) / 3200)));
+    const galaxyRadius = Math.max(width, height) * 0.58;
+
+    fieldStars = Array.from({ length: fieldCount }, () => ({
+      x: rand() * width,
+      y: rand() * height,
+      size: 0.55 + rand() * 1.85,
+      alpha: 0.18 + rand() * 0.72,
+      drift: 0.08 + rand() * 0.28,
+      tone: rand(),
+    }));
+
+    armStars = Array.from({ length: armCount }, (_, index) => {
+      const arm = index % 4;
+      const radius = Math.pow(rand(), 0.58) * galaxyRadius;
+      const angle = arm * (Math.PI / 2) + radius * 0.011 + (rand() - 0.5) * 0.86;
+      return {
+        arm,
+        radius,
+        angle,
+        size: 0.45 + rand() * 1.6,
+        alpha: 0.18 + rand() * 0.72,
+        spin: 0.000018 + rand() * 0.00004,
+        tone: rand(),
+      };
+    });
+
+    comets = Array.from({ length: 3 }, (_, index) => ({
+      x: rand() * width,
+      y: rand() * height * 0.7,
+      speed: 0.38 + rand() * 0.36,
+      delay: index * 480,
+      size: 1.4 + rand() * 1.8,
     }));
   };
 
-  const draw = () => {
+  const drawNebula = (time, centerX, centerY) => {
+    const pulse = 1 + Math.sin(time * 0.00032) * 0.035;
+    const gradient = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) * 0.62 * pulse);
+    gradient.addColorStop(0, 'rgba(38, 216, 255, 0.16)');
+    gradient.addColorStop(0.26, 'rgba(155, 134, 255, 0.10)');
+    gradient.addColorStop(0.48, 'rgba(255, 93, 126, 0.06)');
+    gradient.addColorStop(1, 'rgba(2, 4, 10, 0)');
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.ellipse(centerX, centerY, Math.max(width, height) * 0.64, Math.max(width, height) * 0.3, -0.24, 0, Math.PI * 2);
+    context.fill();
+  };
+
+  const draw = (time = 0) => {
     context.clearRect(0, 0, width, height);
-    for (const star of stars) {
+    const parallaxX = pointer.active ? (pointer.x - width / 2) * 0.012 : 0;
+    const parallaxY = pointer.active ? (pointer.y - height / 2) * 0.012 : 0;
+    const centerX = width * 0.62 + parallaxX;
+    const centerY = height * 0.38 + parallaxY;
+
+    drawNebula(time, centerX, centerY);
+
+    for (const star of fieldStars) {
       if (!reduceMotion) {
-        star.x += star.z * 0.2;
-        if (star.x > width) star.x = 0;
+        star.x += star.drift;
+        if (star.x > width + 6) star.x = -6;
       }
-      const alpha = 0.22 + star.z * 0.58;
-      context.fillStyle = star.tone > 0.88 ? `rgba(255,189,89,${alpha})` : `rgba(184,240,255,${alpha})`;
-      const size = 1 + star.z * 1.4;
-      context.fillRect(star.x, star.y, size, size);
+      const alpha = star.alpha * (0.72 + Math.sin(time * 0.001 + star.x) * 0.18);
+      context.fillStyle = star.tone > 0.9
+        ? `rgba(255, 191, 95, ${alpha})`
+        : `rgba(206, 244, 255, ${alpha})`;
+      context.beginPath();
+      context.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      context.fill();
     }
-    if (!reduceMotion) requestAnimationFrame(draw);
+
+    for (const star of armStars) {
+      const angle = star.angle + (reduceMotion ? 0 : time * star.spin);
+      const flatten = 0.42 + star.radius / Math.max(width, height) * 0.08;
+      const x = centerX + Math.cos(angle) * star.radius + parallaxX * (star.radius / Math.max(width, height));
+      const y = centerY + Math.sin(angle) * star.radius * flatten + parallaxY * 0.8;
+      if (x < -20 || x > width + 20 || y < -20 || y > height + 20) continue;
+      const twinkle = 0.72 + Math.sin(time * 0.0016 + star.arm + star.radius) * 0.22;
+      const alpha = star.alpha * twinkle;
+      context.fillStyle = star.tone > 0.86
+        ? `rgba(255, 93, 126, ${alpha})`
+        : star.tone > 0.68
+          ? `rgba(110, 248, 164, ${alpha})`
+          : `rgba(120, 225, 255, ${alpha})`;
+      context.beginPath();
+      context.arc(x, y, star.size, 0, Math.PI * 2);
+      context.fill();
+    }
+
+    if (!reduceMotion) {
+      for (const comet of comets) {
+        const travel = ((time * comet.speed + comet.delay) % (width + 620)) - 360;
+        const x = travel;
+        const y = comet.y + Math.sin(time * 0.0007 + comet.delay) * 24;
+        const tail = 120;
+        const gradient = context.createLinearGradient(x - tail, y + 36, x, y);
+        gradient.addColorStop(0, 'rgba(38, 216, 255, 0)');
+        gradient.addColorStop(1, 'rgba(235, 252, 255, 0.72)');
+        context.strokeStyle = gradient;
+        context.lineWidth = comet.size;
+        context.beginPath();
+        context.moveTo(x - tail, y + 36);
+        context.lineTo(x, y);
+        context.stroke();
+      }
+    }
+
+    if (!reduceMotion) frame = requestAnimationFrame(draw);
   };
 
   resize();
   draw();
   window.addEventListener('resize', resize);
+  window.addEventListener('pointermove', (event) => {
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.active = true;
+  }, { passive: true });
+  window.addEventListener('beforeunload', () => cancelAnimationFrame(frame));
 }
 
 function initReadProgress() {
@@ -171,15 +321,23 @@ function initAudioDock() {
   const tracks = JSON.parse(dock.dataset.tracks || '[]');
   if (!tracks.length) return;
 
-  const audio = new Audio();
-  audio.preload = 'metadata';
+  const audio = document.querySelector('#bgmAudio');
+  if (!(audio instanceof HTMLAudioElement)) return;
+
+  audio.preload = 'auto';
   audio.volume = 0.42;
   let index = 0;
   let seeking = false;
   let visualFrame = 0;
+  let wantsPlayback = false;
+  let audioContext = null;
+  let synth = null;
+  let synthStart = 0;
+  const synthDuration = 96;
 
   const title = document.querySelector('#trackTitle');
   const mood = document.querySelector('#trackMood');
+  const status = document.querySelector('#audioStatus');
   const time = document.querySelector('#trackTime');
   const progress = document.querySelector('#trackProgress');
   const volume = document.querySelector('#volumeControl');
@@ -188,82 +346,227 @@ function initAudioDock() {
   const next = document.querySelector('#nextTrack');
   const bars = Array.from(document.querySelectorAll('#audioVisualizer span'));
 
-  const setTrack = (nextIndex, shouldPlay = false) => {
-    index = (nextIndex + tracks.length) % tracks.length;
-    const track = tracks[index];
-    audio.src = track.src;
-    if (title) title.textContent = track.title;
-    if (mood) mood.textContent = track.mood;
-    if (time) time.textContent = '0:00';
-    if (progress instanceof HTMLInputElement) progress.value = '0';
-    if (shouldPlay) {
-      audio.play().catch(() => body.classList.remove('audio-playing'));
-    }
+  const setStatus = (message, state = 'idle') => {
+    dock.dataset.state = state;
+    if (status) status.textContent = message;
   };
 
+  const isPlaying = () => Boolean(synth) || (!audio.paused && !audio.ended);
+
   const syncPlayState = () => {
-    const playing = !audio.paused && !audio.ended;
+    const playing = isPlaying();
     body.classList.toggle('audio-playing', playing);
     play?.setAttribute('aria-label', playing ? '暂停背景音乐' : '播放背景音乐');
     play?.setAttribute('title', playing ? '暂停背景音乐' : '播放背景音乐');
   };
 
+  const stopSynth = () => {
+    if (!synth) return;
+    const now = synth.context.currentTime;
+    synth.master.gain.cancelScheduledValues(now);
+    synth.master.gain.setTargetAtTime(0, now, 0.04);
+    synth.nodes.forEach((node) => {
+      try {
+        node.stop(now + 0.16);
+      } catch {
+        // Nodes can only be stopped once.
+      }
+    });
+    synth = null;
+  };
+
+  const startFallbackSynth = async () => {
+    const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextConstructor) return false;
+
+    audio.pause();
+    audio.currentTime = 0;
+    if (!audioContext) audioContext = new AudioContextConstructor();
+    await audioContext.resume();
+
+    stopSynth();
+    const baseFrequency = [92, 128, 73][index % 3];
+    const master = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+    const lfo = audioContext.createOscillator();
+    const lfoGain = audioContext.createGain();
+    const nodes = [];
+
+    master.gain.value = Number(volume?.value || 0.42) * 0.22;
+    filter.type = 'lowpass';
+    filter.frequency.value = 720;
+    filter.Q.value = 0.55;
+    lfo.frequency.value = 0.055;
+    lfoGain.gain.value = 180;
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    filter.connect(master);
+    master.connect(audioContext.destination);
+
+    [1, 1.5, 2.01].forEach((ratio, oscillatorIndex) => {
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = oscillatorIndex === 1 ? 'triangle' : 'sine';
+      oscillator.frequency.value = baseFrequency * ratio;
+      gain.gain.value = [0.18, 0.08, 0.05][oscillatorIndex];
+      oscillator.connect(gain);
+      gain.connect(filter);
+      oscillator.start();
+      nodes.push(oscillator);
+    });
+
+    lfo.start();
+    nodes.push(lfo);
+    synth = { context: audioContext, master, nodes };
+    synthStart = performance.now();
+    setStatus(`正在播放备用合成音轨：${tracks[index].title}`, 'playing');
+    syncPlayState();
+    return true;
+  };
+
   const updateProgress = () => {
+    if (synth) {
+      const elapsed = (performance.now() - synthStart) / 1000;
+      if (!seeking && progress instanceof HTMLInputElement) {
+        progress.value = String(Math.round(((elapsed % synthDuration) / synthDuration) * 1000));
+      }
+      if (time) time.textContent = formatTime(elapsed);
+      return;
+    }
+
     if (!seeking && progress instanceof HTMLInputElement && Number.isFinite(audio.duration) && audio.duration > 0) {
       progress.value = String(Math.round((audio.currentTime / audio.duration) * 1000));
     }
     if (time) time.textContent = formatTime(audio.currentTime);
   };
 
+  const requestPlayback = async () => {
+    wantsPlayback = true;
+    stopSynth();
+    setStatus('正在加载本地音轨...', 'loading');
+    syncPlayState();
+
+    try {
+      if (!audio.currentSrc) audio.load();
+      await audio.play();
+      setStatus(`正在播放：${tracks[index].title}`, 'playing');
+      syncPlayState();
+    } catch (error) {
+      console.warn('Audio element playback failed, starting Web Audio fallback.', error);
+      const started = await startFallbackSynth();
+      if (!started) {
+        wantsPlayback = false;
+        setStatus('浏览器阻止播放，请再点一次播放按钮。', 'blocked');
+        syncPlayState();
+      }
+    }
+  };
+
+  const setTrack = (nextIndex, shouldPlay = false) => {
+    index = (nextIndex + tracks.length) % tracks.length;
+    const track = tracks[index];
+    wantsPlayback = shouldPlay;
+    stopSynth();
+    audio.pause();
+    audio.src = track.src;
+    audio.load();
+    if (title) title.textContent = track.title;
+    if (mood) mood.textContent = track.mood;
+    if (time) time.textContent = '0:00';
+    if (progress instanceof HTMLInputElement) progress.value = '0';
+    setStatus(shouldPlay ? '正在切换音轨...' : '点击播放，启动深空背景音', shouldPlay ? 'loading' : 'idle');
+    syncPlayState();
+    if (shouldPlay) requestPlayback();
+  };
+
   const animateBars = () => {
-    const playing = !audio.paused && !audio.ended;
+    const playing = isPlaying();
     bars.forEach((bar, i) => {
-      const wave = playing ? 0.42 + Math.abs(Math.sin(Date.now() / (260 + i * 45) + i)) * 0.58 : 0.18 + i * 0.04;
+      const wave = playing ? 0.38 + Math.abs(Math.sin(Date.now() / (230 + i * 43) + i)) * 0.62 : 0.18 + i * 0.04;
       bar.style.transform = `scaleY(${wave.toFixed(3)})`;
     });
+    if (synth) updateProgress();
     visualFrame = requestAnimationFrame(animateBars);
   };
 
   play?.addEventListener('click', () => {
-    if (audio.paused) {
-      audio.play().catch(() => body.classList.remove('audio-playing'));
-    } else {
+    if (isPlaying()) {
+      wantsPlayback = false;
+      stopSynth();
       audio.pause();
+      setStatus('已暂停，点击继续播放。', 'idle');
+      syncPlayState();
+    } else {
+      requestPlayback();
     }
   });
 
-  prev?.addEventListener('click', () => setTrack(index - 1, !audio.paused));
-  next?.addEventListener('click', () => setTrack(index + 1, !audio.paused));
+  prev?.addEventListener('click', () => setTrack(index - 1, isPlaying() || wantsPlayback));
+  next?.addEventListener('click', () => setTrack(index + 1, isPlaying() || wantsPlayback));
 
   progress?.addEventListener('input', () => {
     seeking = true;
-    if (Number.isFinite(audio.duration) && audio.duration > 0 && progress instanceof HTMLInputElement) {
-      audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
-      updateProgress();
+    if (progress instanceof HTMLInputElement) {
+      if (synth) {
+        const nextTime = (Number(progress.value) / 1000) * synthDuration;
+        synthStart = performance.now() - nextTime * 1000;
+        updateProgress();
+      } else if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
+        updateProgress();
+      }
     }
   });
+
   progress?.addEventListener('change', () => {
     seeking = false;
   });
 
   volume?.addEventListener('input', () => {
-    if (volume instanceof HTMLInputElement) audio.volume = Number(volume.value);
+    if (!(volume instanceof HTMLInputElement)) return;
+    const value = Number(volume.value);
+    audio.volume = value;
+    if (synth) {
+      synth.master.gain.setTargetAtTime(value * 0.22, synth.context.currentTime, 0.02);
+    }
   });
 
-  audio.addEventListener('play', syncPlayState);
+  audio.addEventListener('playing', () => {
+    stopSynth();
+    setStatus(`正在播放：${tracks[index].title}`, 'playing');
+    syncPlayState();
+  });
   audio.addEventListener('pause', syncPlayState);
   audio.addEventListener('ended', () => setTrack(index + 1, true));
   audio.addEventListener('timeupdate', updateProgress);
   audio.addEventListener('loadedmetadata', updateProgress);
+  audio.addEventListener('waiting', () => {
+    if (wantsPlayback) setStatus('正在缓冲本地音轨...', 'loading');
+  });
+  audio.addEventListener('stalled', () => {
+    if (wantsPlayback) setStatus('音频加载变慢，正在等待资源。', 'loading');
+  });
+  audio.addEventListener('error', async () => {
+    if (wantsPlayback) {
+      const started = await startFallbackSynth();
+      if (!started) setStatus('音频加载失败，请检查浏览器声音权限。', 'error');
+    } else {
+      setStatus('音频加载失败，点击播放可启用备用音轨。', 'error');
+    }
+  });
 
   setTrack(0, false);
   animateBars();
-  window.addEventListener('beforeunload', () => cancelAnimationFrame(visualFrame));
+  window.addEventListener('beforeunload', () => {
+    cancelAnimationFrame(visualFrame);
+    stopSynth();
+  });
 }
 
 initTheme();
 initCursorGlow();
+initSignalArt();
 initArchive();
-initStarfield();
+initGalaxyCanvas();
 initReadProgress();
 initAudioDock();

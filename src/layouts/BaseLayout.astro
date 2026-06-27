@@ -14,17 +14,17 @@ const base = import.meta.env.BASE_URL;
 const tracks = [
   {
     title: 'Orbit Drift',
-    mood: 'Deep ambient',
+    mood: '深空低频 / 点击播放',
     src: `${base}media/orbit-drift.wav`,
   },
   {
     title: 'Signal Cascade',
-    mood: 'Pulse sequence',
+    mood: '脉冲序列 / 本地音轨',
     src: `${base}media/signal-cascade.wav`,
   },
   {
     title: 'Deep Relay',
-    mood: 'Slow transmission',
+    mood: '慢速中继 / 氛围背景',
     src: `${base}media/deep-relay.wav`,
   },
 ];
@@ -42,10 +42,9 @@ const tracks = [
     <meta property="og:type" content="website" />
     <title>{title}</title>
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
-    <link rel="preload" href={`${base}assets/nebula-field.png`} as="image" />
   </head>
   <body>
-    <canvas class="star-canvas" id="starCanvas" aria-hidden="true"></canvas>
+    <canvas class="galaxy-canvas" id="starCanvas" aria-hidden="true"></canvas>
     <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
     <header class="site-header">
       <a class="brand" href={`${base}`} aria-label="ZDHUA.LOG 首页">
@@ -62,11 +61,12 @@ const tracks = [
         <span class="theme-icon" aria-hidden="true"></span>
       </button>
     </header>
-    <section class="audio-dock" id="audioDock" data-tracks={JSON.stringify(tracks)} aria-label="背景音乐播放器">
+    <section class="audio-dock" id="audioDock" data-tracks={JSON.stringify(tracks)} data-state="idle" aria-label="背景音乐播放器">
       <div class="audio-meta">
         <span class="audio-kicker">ZDHUA.FM</span>
         <strong id="trackTitle">Orbit Drift</strong>
-        <span id="trackMood">Deep ambient</span>
+        <span id="trackMood">{tracks[0].mood}</span>
+        <span class="audio-status" id="audioStatus" aria-live="polite">点击播放，启动深空背景音</span>
       </div>
       <div class="audio-visualizer" id="audioVisualizer" aria-hidden="true">
         <span></span><span></span><span></span><span></span><span></span>
@@ -91,6 +91,9 @@ const tracks = [
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 1.2a3 3 0 0 1 0 3.6l1.5 1.3a5 5 0 0 0 0-6.2l-1.5 1.3z"></path></svg>
         <input id="volumeControl" type="range" min="0" max="1" step="0.01" value="0.42" />
       </label>
+      <audio id="bgmAudio" preload="auto" playsinline>
+        <source src={tracks[0].src} type="audio/wav" />
+      </audio>
     </section>
     <slot />
     <footer class="site-footer">

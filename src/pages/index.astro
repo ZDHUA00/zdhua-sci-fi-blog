@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SignalArt from '../components/SignalArt.astro';
 
 const posts = (await getCollection('blog')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const featured = posts.find((post) => post.data.featured) ?? posts[0];
@@ -25,7 +26,13 @@ const postData = posts.map((post) => ({
   <main>
     <section class="hero-section" aria-labelledby="heroTitle">
       <div class="hero-media" aria-hidden="true">
-        <img src={`${base}assets/nebula-field.png`} alt="" />
+        <div class="hero-orbit-system">
+          <span class="hero-core"></span>
+          <span class="hero-orbit hero-orbit-one"></span>
+          <span class="hero-orbit hero-orbit-two"></span>
+          <span class="hero-orbit hero-orbit-three"></span>
+          <span class="hero-comet"></span>
+        </div>
       </div>
       <div class="hero-grid">
         <div class="hero-copy">
@@ -64,20 +71,20 @@ const postData = posts.map((post) => ({
 
     <section class="feature-strip" aria-label="设计状态">
       <div>
-        <span>Signal</span>
-        <strong>Clean UI</strong>
+        <span>Galaxy</span>
+        <strong>Live canvas</strong>
       </div>
       <div>
         <span>Audio</span>
-        <strong>3 ambient tracks</strong>
+        <strong>Playable BGM</strong>
       </div>
       <div>
-        <span>Assets</span>
-        <strong>local covers</strong>
+        <span>Cards</span>
+        <strong>dynamic visuals</strong>
       </div>
       <div>
         <span>Runtime</span>
-        <strong>Astro static</strong>
+        <strong>Astro + JS/CSS</strong>
       </div>
     </section>
 
@@ -89,7 +96,7 @@ const postData = posts.map((post) => ({
       <div class="featured-grid">
         {posts.slice(0, 3).map((post, index) => (
           <a class:list={['featured-card', index === 0 && 'featured-card-large']} href={`${base}blog/${post.slug}/`}>
-            <img src={`${base}${post.data.cover}`} alt={post.data.coverAlt} loading={index === 0 ? 'eager' : 'lazy'} />
+            <SignalArt signal={post.data.signal} category={post.data.category} class="featured-visual" />
             <span class="signal-line">{post.data.signal} / {post.data.category}</span>
             <h3>{post.data.title}</h3>
             <p>{post.data.description}</p>
@@ -127,7 +134,7 @@ const postData = posts.map((post) => ({
               data-category={post.data.category}
               data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(' ')}`}
             >
-              <img src={`${base}${post.data.cover}`} alt="" loading="lazy" />
+              <SignalArt signal={post.data.signal} category={post.data.category} class="archive-visual" />
               <span>
                 <span class="signal-line">{post.data.signal} / {post.data.category}</span>
                 <h3>{post.data.title}</h3>
@@ -143,7 +150,7 @@ const postData = posts.map((post) => ({
         </div>
 
         <article class="reader-panel" id="readerPanel" aria-labelledby="readerTitle">
-          <img id="readerCover" src={`${base}${featured.data.cover}`} alt={featured.data.coverAlt} />
+          <SignalArt signal={featured.data.signal} category={featured.data.category} class="reader-visual" />
           <div class="reader-meta" id="readerMeta">{featured.data.signal} / {featured.data.category}</div>
           <h3 id="readerTitle">{featured.data.title}</h3>
           <p id="readerExcerpt">{featured.data.description}</p>
@@ -157,16 +164,20 @@ const postData = posts.map((post) => ({
 
     <section class="gallery-section" aria-labelledby="galleryTitle">
       <div class="section-heading">
-        <h2 id="galleryTitle">视觉场</h2>
-        <p>站点图片全部走本地静态资源，不依赖外部图库，部署后加载稳定。</p>
+        <h2 id="galleryTitle">动态视觉场</h2>
+        <p>封面位不再只是静态图片，而是由原生 CSS 和 JavaScript 生成的轨道、扫描线、粒子和星系层。</p>
       </div>
       <div class="gallery-grid">
-        <figure>
-          <img src={`${base}assets/gallery/orbital-console.png`} alt="轨道控制台风格的科幻界面场景" loading="lazy" />
+        <figure class="dynamic-window dynamic-window-console">
+          <div class="window-scene" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
           <figcaption>ORBITAL CONSOLE</figcaption>
         </figure>
-        <figure>
-          <img src={`${base}assets/gallery/signal-archive.png`} alt="信号档案库风格的科幻界面场景" loading="lazy" />
+        <figure class="dynamic-window dynamic-window-archive">
+          <div class="window-scene" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
           <figcaption>SIGNAL ARCHIVE</figcaption>
         </figure>
       </div>

@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SignalArt from '../../components/SignalArt.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -18,7 +19,7 @@ const base = import.meta.env.BASE_URL;
     <article class="article-page">
       <header class="article-header">
         <div class="article-cover">
-          <img src={`${base}${post.data.cover}`} alt={post.data.coverAlt} />
+          <SignalArt signal={post.data.signal} category={post.data.category} class="article-visual" />
         </div>
         <span class="signal-line">{post.data.signal} / {post.data.category} / {post.data.readTime}</span>
         <h1>{post.data.title}</h1>
